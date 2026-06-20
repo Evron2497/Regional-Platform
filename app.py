@@ -361,8 +361,8 @@ else:
         <div class="pay-box">
             <h3>💰 Instant Paybill Payment Required</h3>
             <p>Please complete payment via M-Pesa to generate your receipt transaction code.</p>
-            Business Paybill: <b>3043935</b><br>
-            Account Number: <b style="color:#ff1493; font-size:18px;">016536784672{p['id']}</b><br>
+            Business Till: <b>482394</b><br>
+            Account Number: <b style="color:#ff1493; font-size:18px;">880200381648{p['id']}</b><br>
             Amount: <b>KES {p["rate"]:.2f}</b>
         </div>
         """, unsafe_allow_html=True)
@@ -408,7 +408,7 @@ else:
                 <div class="pay-box">
                     <h3>🤝 Goal Unlocked: Authorize Meetup Routing</h3>
                     <p>Contribute your 50% split registration tier through Paybill.</p>
-                    Business Paybill: <b>3043935</b><br>
+                    Business Till: <b>482394</b><br>
                     Account Number: <b style="color:#ff1493; font-size:18px;">MEET016536{p['id']}</b><br>
                     Amount: <b>KES {half:.2f}</b>
                 </div>
