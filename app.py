@@ -357,7 +357,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- APP LOGIC ---
+# --- APP LOGIC ---# --- APP LOGIC ---
 if "selected" not in st.session_state:
     # --- MARKETPLACE ---
     profiles = db.get_available_profiles()
@@ -374,8 +374,9 @@ if "selected" not in st.session_state:
                 st.write(f"💬 **Chat Rate:** KES {p['chat_rate']:.2f}")
                 st.write(f"🤝 **Meetup Rate:** KES {p['meetup_rate']:.2f}")
                 
+                # Directly assign the clean dictionary p to session state
                 if st.button(f"Connect with {p['name']}", key=f"btn_{p['id']}"):
-                    st.session_state.selected = dict(p)
+                    st.session_state.selected = p
                     st.rerun()
 else:
     # --- PRIVATE SESSION ---
