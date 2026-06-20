@@ -101,7 +101,6 @@
 #     conn.close()
 #     return row is not None
 
-
 import sqlite3
 
 def get_db():
@@ -114,7 +113,7 @@ def get_db():
 def init_db():
     conn = get_db()
     
-    # 1. Profiles Table (Updated with chat_rate and meetup_rate)
+    # 1. Profiles Table (Ensuring default fallback values)
     conn.execute('''CREATE TABLE IF NOT EXISTS profiles 
                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                      name TEXT, 
@@ -126,7 +125,7 @@ def init_db():
                      photo_url TEXT, 
                      status TEXT DEFAULT 'browsing')''')
     
-    # 2. Transactions Table (Updated with merchant_request_id and a 'pending' default status)
+    # 2. Transactions Table 
     conn.execute('''CREATE TABLE IF NOT EXISTS transactions 
                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                      transaction_id TEXT UNIQUE, 
@@ -151,10 +150,25 @@ def add_single_profile(name, continent, country, bio, chat_rate, meetup_rate, ph
     conn.close()
 
 def get_profiles():
+    """Returns all profiles safely transformed into explicit dicts to avoid indexing crashes"""
     conn = get_db()
-    data = conn.execute("SELECT * FROM profiles").fetchall()
+    rows = conn.execute("SELECT * FROM profiles").fetchall()
     conn.close()
-    return data
+    
+    profiles = []
+    for row in rows:
+        profiles.append({
+            'id': row['id'],
+            'name': row['name'],
+            'continent': row['continent'],
+            'country': row['country'],
+            'bio': row['bio'],
+            'chat_rate': row['chat_rate'] if row['chat_rate'] is not None else 0.0,
+            'meetup_rate': row['meetup_rate'] if row['meetup_rate'] is not None else 0.0,
+            'photo_url': row['photo_url'],
+            'status': row['status']
+        })
+    return profiles
 
 def get_single_profile_rates(profile_id: int):
     """Helper used by the FastAPI STK Push endpoint to determine price dynamically"""
@@ -164,9 +178,11 @@ def get_single_profile_rates(profile_id: int):
     return row
 
 def get_available_profiles():
+    """Fixes IndexError by forcing strict column naming and dictionary structures"""
     conn = get_db()
     query = """
-        SELECT p.* FROM profiles p 
+        SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status 
+        FROM profiles p 
         WHERE NOT EXISTS (
             SELECT 1 FROM transactions t 
             WHERE t.account_ref = '016536784672' || p.id 
@@ -174,9 +190,23 @@ def get_available_profiles():
             AND t.status = 'completed'
         )
     """
-    data = conn.execute(query).fetchall()
+    rows = conn.execute(query).fetchall()
     conn.close()
-    return data
+    
+    profiles = []
+    for row in rows:
+        profiles.append({
+            'id': row['id'],
+            'name': row['name'],
+            'continent': row['continent'],
+            'country': row['country'],
+            'bio': row['bio'],
+            'chat_rate': row['chat_rate'] if row['chat_rate'] is not None else 0.0,
+            'meetup_rate': row['meetup_rate'] if row['meetup_rate'] is not None else 0.0,
+            'photo_url': row['photo_url'],
+            'status': row['status']
+        })
+    return profiles
 
 def update_profile(id, name, continent, country, bio, chat_rate, meetup_rate, photo_url):
     conn = get_db()
