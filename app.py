@@ -358,6 +358,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- APP LOGIC ---# --- APP LOGIC ---
+# --- APP LOGIC ---
 if "selected" not in st.session_state:
     # --- MARKETPLACE ---
     profiles = db.get_available_profiles()
@@ -368,15 +369,21 @@ if "selected" not in st.session_state:
         cols = st.columns(3) 
         for idx, p in enumerate(profiles):
             with cols[idx % 3]:
-                st.image(p['photo_url'], width='stretch')
-                st.write(f"### {p['name']}")
-                st.write(f"📍 **Location:** {p['country']}, {p['continent']}")
-                st.write(f"💬 **Chat Rate:** KES {p['chat_rate']:.2f}")
-                st.write(f"🤝 **Meetup Rate:** KES {p['meetup_rate']:.2f}")
+                # Safely handle dictionary conversions
+                profile_dict = dict(p) if not isinstance(p, dict) else p
                 
-                # Directly assign the clean dictionary p to session state
-                if st.button(f"Connect with {p['name']}", key=f"btn_{p['id']}"):
-                    st.session_state.selected = p
+                # Use .get() with a default fallback of 0.0 to prevent any IndexError crashes
+                chat_rate = profile_dict.get('chat_rate', profile_dict.get('rate', 0.0))
+                meetup_rate = profile_dict.get('meetup_rate', 0.0)
+                
+                st.image(profile_dict['photo_url'], width='stretch')
+                st.write(f"### {profile_dict['name']}")
+                st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
+                st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
+                st.write(f"🤝 **Meetup Rate:** KES {meetup_rate:.2f}")
+                
+                if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
+                    st.session_state.selected = profile_dict
                     st.rerun()
 else:
     # --- PRIVATE SESSION ---
