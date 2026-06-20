@@ -258,6 +258,18 @@ if "verified_meetups" not in st.session_state:
     st.session_state.verified_meetups = set()
 
 # --- CSS ---
+
+import streamlit as st
+
+# CSS to hide the Streamlit "Manage app" menu
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            .stAppDeployButton {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # --- CSS ---
 st.markdown("""
     <style>
