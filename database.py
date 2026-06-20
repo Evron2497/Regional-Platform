@@ -113,17 +113,26 @@ def get_db():
 def init_db():
     conn = get_db()
     
-    # 1. Profiles Table (Ensuring default fallback values)
+    # 1. Profiles Table (Base table execution setup)
     conn.execute('''CREATE TABLE IF NOT EXISTS profiles 
                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                      name TEXT, 
                      continent TEXT, 
                      country TEXT, 
                      bio TEXT, 
-                     chat_rate REAL DEFAULT 0.0, 
-                     meetup_rate REAL DEFAULT 0.0, 
                      photo_url TEXT, 
                      status TEXT DEFAULT 'browsing')''')
+    
+    # AUTOMATED MIGRATION: Safely inject new rate columns if database file already exists
+    try:
+        conn.execute("ALTER TABLE profiles ADD COLUMN chat_rate REAL DEFAULT 0.0;")
+    except sqlite3.OperationalError:
+        pass  # Column already exists, safe to ignore
+        
+    try:
+        conn.execute("ALTER TABLE profiles ADD COLUMN meetup_rate REAL DEFAULT 0.0;")
+    except sqlite3.OperationalError:
+        pass  # Column already exists, safe to ignore
     
     # 2. Transactions Table 
     conn.execute('''CREATE TABLE IF NOT EXISTS transactions 
