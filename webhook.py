@@ -74,13 +74,13 @@ import httpx
 app = FastAPI()
 
 # --- CONFIGURATION (Populate with your Daraja Details) ---
-MPESA_CONSUMER_KEY = "YOUR_CONSUMER_KEY"
-MPESA_CONSUMER_SECRET = "YOUR_CONSUMER_SECRET"
-MPESA_PASSKEY = "YOUR_LIPA_NA_MPESA_ONLINE_PASSKEY"
+MPESA_CONSUMER_KEY = "p8Fhi6QWduA2P7opsijEWJA7Uy55WbPmotMMVvnLC5Dw4W9e"
+MPESA_CONSUMER_SECRET = "gAyVOCGwrCfBoQxA23968I4gpAQ0R4Q44p5rDrGEmC9orGlFKtVK0o7uc6wZRpGx"
+MPESA_PASSKEY = "N/A"
 
 # For Tills (Buy Goods), your Shortcode is usually the Till Number. 
 # For Paybills, it's the Paybill Number.
-MPESA_SHORTCODE = "YOUR_TILL_OR_PAYBILL_NUMBER" 
+MPESA_SHORTCODE = "727691" 
 CALLBACK_URL = "https://yourdomain.com/mpesa/callback" 
 
 def get_webhook_db():
