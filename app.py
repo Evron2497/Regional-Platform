@@ -278,6 +278,27 @@ import uuid
 import base64
 import requests  # Added to make requests to your FastAPI M-Pesa backend
 
+
+import subprocess
+import time
+import os
+
+# --- EMBEDDED BACKEND BOOTSTRAPPER ---
+# This forces FastAPI to run as a quiet background process on port 8000 inside the same container
+if "backend_started" not in st.session_state:
+    try:
+        # Replace 'main:app' with the filename:variable of your FastAPI server
+        # (e.g., if your FastAPI app code is in main.py, keep it as main:app)
+        subprocess.Popen([
+            "uvicorn", "main:app", 
+            "--host", "127.0.0.1", 
+            "--port", "8000"
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        st.session_state.backend_started = True
+        time.sleep(2) # Give the background process 2 seconds to bind to port 8000 safely
+    except Exception as e:
+        st.error(f"Internal wrapper failed to spin up background API gateway: {e}")
+
 # --- PAGE CONFIG ---
 st.set_page_config(layout="wide", page_title="TECH-STAR")
 db.init_db()
