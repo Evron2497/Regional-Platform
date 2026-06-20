@@ -262,16 +262,19 @@ if "verified_meetups" not in st.session_state:
 import streamlit as st
 
 import streamlit as st
+import streamlit as st
 
+# Hide the Streamlit "Manage app" button and default menu
 hide_streamlit_style = """
             <style>
+            /* Hide the "Manage app" button */
+            [data-testid="stAppDeployButton"] {
+                display: none !important;
+            }
+            
+            /* Optional: Hide the default Streamlit menu and footer */
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
-            /* Target the specific deployment button container */
-            [data-testid="stAppDeployButton"] {
-                visibility: hidden;
-                display: none;
-            }
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
