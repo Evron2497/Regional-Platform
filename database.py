@@ -204,7 +204,6 @@
     
 #     conn.close()
 #     return row is not None
-
 import sqlite3
 
 def get_db():
@@ -378,7 +377,7 @@ def submit_manual_transaction(tx_id, profile_id, account_ref, amount, payment_ty
         conn.close()
 
 def get_pending_verifications():
-    """Fetches all raw client transactions awaiting administrative approval"""
+    """Fetifications all raw client transactions awaiting administrative approval"""
     conn = get_db()
     rows = conn.execute("""
         SELECT t.*, p.name as profile_name 
