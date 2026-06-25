@@ -250,10 +250,10 @@
 #         sub_img = st.file_uploader("Upload Profile Image", type=['png', 'jpg'], key="sub_img")
         
 #         st.divider()
-#         st.markdown("**💳 M-Pesa Checkout Engine**")
+#         st.markdown("**💳 M-Pesa Checkout**")
 #         sub_phone = st.text_input("📱 M-Pesa Phone Number:", key="sub_phone_input", placeholder="07XXXXXXXX").strip()
         
-#         if st.button("🚀 Pay KES 100 via STK Push", key="sub_pay_btn"):
+#         if st.button("🚀 Pay KES 100 ", key="sub_pay_btn"):
 #             if not sub_name or not sub_phone:
 #                 st.warning("Please fill in your name and a valid Safaricom phone number to trigger payments.")
 #             else:
@@ -428,7 +428,7 @@ def trigger_stk_push(phone_number, profile_id, amount, payment_type):
         "phone_number": phone_number,
         "amount": int(amount),
         "paybill": "542542",                     # Your exact paybill configuration
-        "account_number": account_reference,      # Generates e.g., 446040-CHA12
+        "account_number": "446040",      # Generates e.g., 446040-CHA12
         "profile_id": int(profile_id),
         "payment_type": payment_type
     }
