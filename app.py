@@ -374,6 +374,7 @@
 # """, unsafe_allow_html=True)
 
 
+
 import streamlit as st
 import database as db
 import os
@@ -411,23 +412,7 @@ def save_uploaded_file(uploaded_file):
         f.write(uploaded_file.getbuffer())
     return file_path
 
-def trigger_stk_push(phone_number, profile_id, amount, payment_type):
-    url = f"{FASTAPI_BACKEND_URL}/mpesa/stk-push"
-    payload = {
-        "phone_number": phone_number,
-        "amount": int(amount),
-        "paybill": "542542",                     
-        "account_number": "446040",      
-        "profile_id": int(profile_id),
-        "payment_type": payment_type
-    }
-    try:
-        response = requests.post(url, json=payload, timeout=12.0)
-        return response.json()
-    except Exception as e:
-        return {"status": "error", "message": f"Could not connect to payment backend: {str(e)}"}
-
-# --- STATE MANAGEMENT ---
+# --- STATE ---
 if "admin_logged_in" not in st.session_state: 
     st.session_state.admin_logged_in = False
 
@@ -437,7 +422,11 @@ if "verified_chats" not in st.session_state:
 if "verified_meetups" not in st.session_state:
     st.session_state.verified_meetups = set()
 
-# --- CSS MODIFICATIONS ---
+# Global dict to hold submissions for Admin approval notification
+if "admin_notifications" not in st.session_state:
+    st.session_state.admin_notifications = []
+
+# --- CSS ---
 st.markdown("""
     <style>
     [data-testid="stHeader"] {
@@ -473,9 +462,9 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- MAIN RENDER APPLICATION LOGIC ---
+# --- APP LOGIC ---
 if "selected" not in st.session_state:
-    # --- MARKETPLACE VIEW ---
+    # --- MARKETPLACE ---
     profiles = db.get_available_profiles()
     
     if not profiles:
@@ -485,6 +474,7 @@ if "selected" not in st.session_state:
         for idx, p in enumerate(profiles):
             with cols[idx % 3]:
                 profile_dict = dict(p) if not isinstance(p, dict) else p
+                
                 chat_rate = profile_dict.get('chat_rate', profile_dict.get('rate', 0.0))
                 meetup_rate = profile_dict.get('meetup_rate', 0.0)
                 
@@ -498,45 +488,46 @@ if "selected" not in st.session_state:
                     st.session_state.selected = profile_dict
                     st.rerun()
 else:
-    # --- PRIVATE ACTIVE SESSION VIEW ---
+    # --- PRIVATE SESSION ---
     p = st.session_state.selected
     st.title(f"🔒 Session: {p['name']}")
     if st.button("⬅️ Back"):
         del st.session_state.selected
         st.rerun()
     
-    # 1. CHAT SESSION GATEKEEPER
+    # 1. GATEKEEPER: CHAT TRANSACTION SUBMISSION
     if p['id'] not in st.session_state.verified_chats:
         st.markdown(f"""
         <div class="pay-box">
-            <h3>💰 Lipa Na M-Pesa Paybill Checkout Required</h3>
-            <p>Please send payment to unlock your chat link session. Provide the admin with your transaction ID to enable access.</p>
+            <h3>💰 Lipa Na M-Pesa Paybill Manual Verification Required</h3>
+            <p>Please pay using the details below, then enter your Transaction ID for Admin verification.</p>
+            <b>Payment Destination:</b> Lipa Na IMBANK<br>
             <b>Business Paybill:</b> 542542<br>
             <b>Account Target:</b> 446040-CHA{p['id']}<br>
-            <b>Service Selected:</b> Secure Direct Chat Line<br>
             <b>Amount:</b> KES {p["chat_rate"]:.2f}
         </div>
         """, unsafe_allow_html=True)
         
-        chat_phone = st.text_input("📱 Enter M-Pesa Phone Number (e.g., 0712345678):", key=f"phone_chat_{p['id']}").strip()
+        fallback_tx_id = st.text_input("Verification Step: Paste M-Pesa Transaction ID (e.g., SFT712XYZ0):", key=f"tx_chat_{p['id']}").strip().upper()
         
-        if st.button("🚀 Send M-Pesa PIN Prompt", key=f"stk_chat_btn_{p['id']}"):
-            if chat_phone:
-                with st.spinner("Firing secure payment connection line..."):
-                    res = trigger_stk_push(chat_phone, p['id'], p['chat_rate'], "chat")
-                    if res.get("status") == "initiated":
-                        st.success("✅ STK prompt dispatched! Enter your PIN. Access unlocks as soon as an Admin approves your payment code.")
-                    else:
-                        st.error(f"Failed to initiate transaction: {res.get('error', res.get('message'))}")
+        if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
+            if fallback_tx_id:
+                # Add notification to global session pool for administrative evaluation
+                notification = {"tx_id": fallback_tx_id, "profile_id": p['id'], "type": "chat", "name": p['name']}
+                if notification not in st.session_state.admin_notifications:
+                    st.session_state.admin_notifications.append(notification)
+                st.info("🕒 Code submitted! Please wait for an Admin to verify and accept your payment.")
             else:
-                st.warning("Please type a valid active Safaricom number to receive the payment prompt.")
+                st.warning("Please paste a valid transaction ID before submitting.")
         
-        st.info("⏳ Awaiting Administrator verification. Refresh this session once your payment ID is approved by support.")
-        if st.button("🔄 Check Authorization Status"):
-            st.rerun()
+        # Display structural waiting notice if client already sent information
+        if any(n['tx_id'] == fallback_tx_id and n['type'] == 'chat' for n in st.session_state.admin_notifications if fallback_tx_id):
+            st.warning("⏳ Access Pending: Admin is actively verifying your transaction entry. Click below to refresh status.")
+            if st.button("🔄 Refresh Status Window"):
+                st.rerun()
         st.stop()
 
-    # 2. CHAT & MEETUP FLOW LOGIC
+    # 2. CHAT & MEETUP FLOW
     is_meetup_approved = db.check_meetup_status(p['id'])
     
     if is_meetup_approved:
@@ -558,41 +549,40 @@ else:
             if p['id'] not in st.session_state.verified_meetups:
                 st.markdown(f"""
                 <div class="pay-box">
-                    <h3>🤝 Goal Unlocked: Authorize Meetup Routing</h3>
-                    <p>Enter your phone number below to initialize the meetup request processing step.</p>
+                    <h3>🤝 Goal Unlocked: Meetup Routing Authorization</h3>
+                    <p>Pay the logistics fee manually, then submit the Transaction ID below.</p>
                     <b>Business Paybill:</b> 542542<br>
                     <b>Account Target:</b> 446040-MEE{p['id']}<br>
                     <b>Amount:</b> KES {p['meetup_rate']:.2f}
                 </div>
                 """, unsafe_allow_html=True)
                 
-                meetup_phone = st.text_input("📱 Enter M-Pesa Phone Number for Meetup Payment:", key=f"phone_meet_{p['id']}").strip()
+                fallback_meet_tx = st.text_input("Enter Meetup Payment Transaction ID to unlock:", key=f"tx_meet_{p['id']}").strip().upper()
                 
-                if st.button("🚀 Send Meetup STK Prompt", key=f"stk_meet_btn_{p['id']}"):
-                    if meetup_phone:
-                        with st.spinner("Requesting prompt payment access..."):
-                            res = trigger_stk_push(meetup_phone, p['id'], p['meetup_rate'], "meetup")
-                            if res.get("status") == "initiated":
-                                st.success("✅ Meetup PIN Prompt sent! Hand your transaction ID to Admin to clear verification parameters.")
-                            else:
-                                st.error(f"Error firing prompt: {res.get('message')}")
+                if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
+                    if fallback_meet_tx:
+                        notification = {"tx_id": fallback_meet_tx, "profile_id": p['id'], "type": "meetup", "name": p['name']}
+                        if notification not in st.session_state.admin_notifications:
+                            st.session_state.admin_notifications.append(notification)
+                        st.info("🕒 Meetup registration sent. Awaiting Admin clearance review.")
                     else:
-                        st.warning("Please provide a phone number.")
+                        st.warning("Please specify an operational Transaction reference string.")
                 
-                st.info("⏳ Awaiting admin verification of meetup fee. Press below to update status window.")
-                if st.button("🔄 Check Authorization Status", key=f"check_meet_auth_{p['id']}"):
-                    st.rerun()
+                if any(n['tx_id'] == fallback_meet_tx and n['type'] == 'meetup' for n in st.session_state.admin_notifications if fallback_meet_tx):
+                    st.warning("⏳ Awaiting Administrative Approval for physical routing activation parameters.")
+                    if st.button("🔄 Check Authorization Status"):
+                        st.rerun()
                 st.stop()
             else:
                 st.warning("Meetup remittance confirmed processing backend. Awaiting operational administrative assignment authorization.")
                 st.stop()
 
-# --- SIDEBAR CONTROL PANEL PANEL ---
+# --- SIDEBAR CONTENT PANEL ---
 with st.sidebar:
     st.header("✨ Add Your Profile Display")
     st.markdown("""
     <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px solid #ff1493; color: black; font-size:13px; margin-bottom:10px;">
-        📢 <b>Want your profile listed?</b> Fill in details. Submission costs <b>KES 100.00</b>. Send payment, then give the Transaction ID to Admin to push life.
+        📢 <b>Want your profile listed?</b> Fill registration metrics. Submission processing fee costs <b>KES 100.00</b> via Paybill 542542.
     </div>
     """, unsafe_allow_html=True)
     
@@ -604,23 +594,20 @@ with st.sidebar:
         sub_img = st.file_uploader("Upload Profile Image", type=['png', 'jpg'], key="sub_img")
         
         st.divider()
-        st.markdown("**¼ M-Pesa Paybill Checkout**")
-        sub_phone = st.text_input("📱 M-Pesa Phone Number:", key="sub_phone_input", placeholder="07XXXXXXXX").strip()
+        sub_tx_id = st.text_input("Verification Step: Paste M-Pesa Code", key="sub_tx_verify").strip().upper()
         
-        if st.button("🚀 Pay KES 100 via STK Push", key="sub_pay_btn"):
-            if not sub_name or not sub_phone:
-                st.warning("Please fill in your name and phone number.")
+        if st.button("🔓 Submit Profile for Verification", key="sub_verify_btn"):
+            if not sub_tx_id or not sub_name:
+                st.error("Please ensure your name is written and your transaction code is copied accurately.")
             else:
-                with st.spinner("Dispatching secure payment API line..."):
-                    res = trigger_stk_push(sub_phone, 0, 100, "profile_submission")
-                    if res.get("status") == "initiated":
-                        st.success("✅ STK prompt dispatched! Share your transaction ID code with an Admin to unlock your listing.")
-                    else:
-                        st.error(f"Failed to initiate transaction: {res.get('message')}")
+                notification = {"tx_id": sub_tx_id, "profile_id": 0, "type": "profile_submission", "name": sub_name, "form_data": {"name": sub_name, "cont": sub_cont, "coun": sub_coun, "bio": sub_bio, "img": sub_img}}
+                if notification not in st.session_state.admin_notifications:
+                    st.session_state.admin_notifications.append(notification)
+                st.info("📨 Form data and reference code submitted to Admin panel queue.")
 
     st.divider()
 
-    # --- ADMIN ACCESS PRIVILEGED AREA ---
+    # --- ADMIN PRIVILEGED MANAGEMENT PANEL ---
     st.header("Admin Management")
     if not st.session_state.admin_logged_in:
         pwd = st.text_input("Password", type="password", key="admin_pwd_entry")
@@ -636,37 +623,39 @@ with st.sidebar:
             st.rerun()
 
         st.divider()
-        st.subheader("🔍 Manual M-Pesa Verification Engine")
+        st.subheader("🔍 Pending Client Verifications")
         
-        # Admin form inputs to verify incoming payments using transaction ids manually
-        verify_tx_input = st.text_input("Paste Received M-Pesa Code:", key="admin_manual_tx_id").strip().upper()
-        verify_profile_target = st.number_input("Target Profile ID:", min_value=0, step=1, key="admin_manual_profile_id")
-        verify_action_type = st.selectbox("Payment Reference Category:", ["chat", "meetup", "profile_submission"], key="admin_manual_type")
-        
-        if st.button("🔓 Force Verify Payment Code", key="admin_force_verify_btn"):
-            if not verify_tx_input:
-                st.error("Please insert an operational transaction reference code.")
-            else:
-                # Direct check override to unlock user sessions dynamically
-                if verify_action_type == "chat":
-                    st.session_state.verified_chats.add(verify_profile_target)
-                    st.success(f"🎉 Chat access manually unlocked for profile ID {verify_profile_target}!")
-                elif verify_action_type == "meetup":
-                    db.approve_meetup(verify_profile_target)
-                    st.session_state.verified_meetups.add(verify_profile_target)
-                    st.success(f"🎉 Meetup access approved for profile ID {verify_profile_target}!")
-                elif verify_action_type == "profile_submission":
-                    f_url = save_uploaded_file(sub_img) if sub_img else "https://via.placeholder.com/150"
-                    db.add_single_profile(sub_name, sub_cont, sub_coun, sub_bio, 150.0, 2000.0, f_url)
-                    st.success(f"🎉 Paid profile created successfully for: {sub_name}!")
-                time.sleep(1.5)
-                st.rerun()
+        if not st.session_state.admin_notifications:
+            st.write("No incoming verification claims.")
+        else:
+            # Render clear incoming code review panels for logged-in admin profiles
+            for idx, note in enumerate(st.session_state.admin_notifications):
+                st.markdown(f"""
+                📌 **Type:** `{note['type'].upper()}` | **Target Client:** {note['name']}<br>
+                💵 **Code Claimed:** `{note['tx_id']}`
+                """, unsafe_allow_html=True)
+                
+                if st.button(f"Approve & Unlock Entry {idx}", key=f"approve_note_{idx}"):
+                    if note['type'] == "chat":
+                        st.session_state.verified_chats.add(note['profile_id'])
+                    elif note['type'] == "meetup":
+                        db.approve_meetup(note['profile_id'])
+                        st.session_state.verified_meetups.add(note['profile_id'])
+                    elif note['type'] == "profile_submission":
+                        fd = note['form_data']
+                        f_url = save_uploaded_file(fd['img']) if fd['img'] else "https://via.placeholder.com/150"
+                        db.add_single_profile(fd['name'], fd['cont'], fd['coun'], fd['bio'], 150.0, 2000.0, f_url)
+                    
+                    # Remove from notification list once validated
+                    st.session_state.admin_notifications.pop(idx)
+                    st.success("Authorized successfully!")
+                    st.rerun()
+                st.divider()
 
-        st.divider()
         st.subheader("📋 Client Directory")
         all_profiles = db.get_profiles()
         for p in all_profiles:
-            with st.expander(f"👤 {p['name']} (ID: {p['id']})"):
+            with st.expander(f"👤 {p['name']}"):
                 n_n = st.text_input("Name", value=p['name'], key=f"en_{p['id']}")
                 n_cr = st.number_input("Chat Rate (KES)", value=float(p['chat_rate']), key=f"ecr_{p['id']}")
                 n_mr = st.number_input("Meetup Rate (KES)", value=float(p['meetup_rate']), key=f"emr_{p['id']}")
@@ -691,3 +680,4 @@ st.markdown("""
     Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
     </div>
 """, unsafe_allow_html=True)
+
