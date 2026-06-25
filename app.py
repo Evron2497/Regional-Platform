@@ -374,7 +374,6 @@
 # """, unsafe_allow_html=True)
 
 
-
 import streamlit as st
 import database as db
 import os
@@ -422,7 +421,6 @@ if "verified_chats" not in st.session_state:
 if "verified_meetups" not in st.session_state:
     st.session_state.verified_meetups = set()
 
-# Global dict to hold submissions for Admin approval notification
 if "admin_notifications" not in st.session_state:
     st.session_state.admin_notifications = []
 
@@ -435,7 +433,7 @@ st.markdown("""
     }
     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
     .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
-    .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; }
+    .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
     .welcome-banner { text-align: center; background-color: #fff0f5; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
     </style> 
@@ -495,16 +493,20 @@ else:
         del st.session_state.selected
         st.rerun()
     
-    # 1. GATEKEEPER: CHAT TRANSACTION SUBMISSION
+    # 1. GATEKEEPER: CHAT PAYMENT ACCOUNT DETAILS
     if p['id'] not in st.session_state.verified_chats:
         st.markdown(f"""
         <div class="pay-box">
-            <h3>💰 Lipa Na M-Pesa Paybill Manual Verification Required</h3>
-            <p>Please pay using the details below, then enter your Transaction ID for Admin verification.</p>
-            <b>Payment Destination:</b> Lipa Na IMBANK<br>
-            <b>Business Paybill:</b> 542542<br>
-            <b>Account Target:</b> 446040-CHA{p['id']}<br>
-            <b>Amount:</b> KES {p["chat_rate"]:.2f}
+            <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
+            <p>To unlock your direct secure chat line, make a manual payment using the billing details below:</p>
+            <hr>
+            <b>1. Go to M-PESA Menu</b><br>
+            <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
+            <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
+            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040-CHA{p['id']}</span><br>
+            <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
+            <hr>
+            <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -512,7 +514,6 @@ else:
         
         if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
             if fallback_tx_id:
-                # Add notification to global session pool for administrative evaluation
                 notification = {"tx_id": fallback_tx_id, "profile_id": p['id'], "type": "chat", "name": p['name']}
                 if notification not in st.session_state.admin_notifications:
                     st.session_state.admin_notifications.append(notification)
@@ -520,9 +521,8 @@ else:
             else:
                 st.warning("Please paste a valid transaction ID before submitting.")
         
-        # Display structural waiting notice if client already sent information
         if any(n['tx_id'] == fallback_tx_id and n['type'] == 'chat' for n in st.session_state.admin_notifications if fallback_tx_id):
-            st.warning("⏳ Access Pending: Admin is actively verifying your transaction entry. Click below to refresh status.")
+            st.warning("⏳ Access Status: Awaiting Admin Approval. Click refresh below to update your line link status.")
             if st.button("🔄 Refresh Status Window"):
                 st.rerun()
         st.stop()
@@ -549,11 +549,14 @@ else:
             if p['id'] not in st.session_state.verified_meetups:
                 st.markdown(f"""
                 <div class="pay-box">
-                    <h3>🤝 Goal Unlocked: Meetup Routing Authorization</h3>
-                    <p>Pay the logistics fee manually, then submit the Transaction ID below.</p>
-                    <b>Business Paybill:</b> 542542<br>
-                    <b>Account Target:</b> 446040-MEE{p['id']}<br>
-                    <b>Amount:</b> KES {p['meetup_rate']:.2f}
+                    <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
+                    <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
+                    <hr>
+                    <b>1. Paybill Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span><br>
+                    <b>2. Account Reference Target:</b> <span style="color:#ff1493; font-weight:bold;">446040-MEE{p['id']}</span><br>
+                    <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p['meetup_rate']:.2f}</span><br>
+                    <hr>
+                    <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -582,7 +585,7 @@ with st.sidebar:
     st.header("✨ Add Your Profile Display")
     st.markdown("""
     <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px solid #ff1493; color: black; font-size:13px; margin-bottom:10px;">
-        📢 <b>Want your profile listed?</b> Fill registration metrics. Submission processing fee costs <b>KES 100.00</b> via Paybill 542542.
+        📢 <b>Want your profile listed?</b> Fill registration metrics. Submission processing fee costs <b>KES 100.00</b> sent manually to <b>Paybill: 542542</b>, <b>Account No: 446040</b>.
     </div>
     """, unsafe_allow_html=True)
     
@@ -628,7 +631,6 @@ with st.sidebar:
         if not st.session_state.admin_notifications:
             st.write("No incoming verification claims.")
         else:
-            # Render clear incoming code review panels for logged-in admin profiles
             for idx, note in enumerate(st.session_state.admin_notifications):
                 st.markdown(f"""
                 📌 **Type:** `{note['type'].upper()}` | **Target Client:** {note['name']}<br>
@@ -646,16 +648,40 @@ with st.sidebar:
                         f_url = save_uploaded_file(fd['img']) if fd['img'] else "https://via.placeholder.com/150"
                         db.add_single_profile(fd['name'], fd['cont'], fd['coun'], fd['bio'], 150.0, 2000.0, f_url)
                     
-                    # Remove from notification list once validated
                     st.session_state.admin_notifications.pop(idx)
                     st.success("Authorized successfully!")
                     st.rerun()
                 st.divider()
 
+        # --- RESTORED: ADD NEW CLIENT MANUALLY ---
+        st.subheader("➕ Create Client Account")
+        with st.expander("Manually Provision New Client Profile", expanded=False):
+            new_name = st.text_input("Name", key="new_name_in")
+            col1, col2 = st.columns(2)
+            with col1:
+                new_cont = st.selectbox("Continent", ["Africa", "America", "Europe", "Asia"], key="new_cont_in")
+                new_chat_rate = st.number_input("Chat Rate (KES)", min_value=0.0, key="new_ch_rate_in")
+            with col2:
+                new_coun = st.text_input("Country", key="new_coun_in")
+                new_meet_rate = st.number_input("Meetup Rate (KES)", min_value=0.0, key="new_mt_rate_in")
+            
+            new_up = st.file_uploader("Upload Image Asset", type=['png', 'jpg'], key="new_add_img")
+            new_bio = st.text_area("Bio/Description Parameters", "Enter bio here...", key="new_bio_in")
+            
+            if st.button("Save New Client", key="save_manual_client_btn"):
+                if not new_name:
+                    st.error("A profile must have an assigned name label.")
+                else:
+                    photo_url = save_uploaded_file(new_up) if new_up else "https://via.placeholder.com/150"
+                    db.add_single_profile(new_name, new_cont, new_coun, new_bio, new_chat_rate, new_meet_rate, photo_url)
+                    st.success(f"Added {new_name} successfully!")
+                    st.rerun()
+
+        st.divider()
         st.subheader("📋 Client Directory")
         all_profiles = db.get_profiles()
         for p in all_profiles:
-            with st.expander(f"👤 {p['name']}"):
+            with st.expander(f"👤 {p['name']} (ID: {p['id']})"):
                 n_n = st.text_input("Name", value=p['name'], key=f"en_{p['id']}")
                 n_cr = st.number_input("Chat Rate (KES)", value=float(p['chat_rate']), key=f"ecr_{p['id']}")
                 n_mr = st.number_input("Meetup Rate (KES)", value=float(p['meetup_rate']), key=f"emr_{p['id']}")
@@ -680,4 +706,3 @@ st.markdown("""
     Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
     </div>
 """, unsafe_allow_html=True)
-
