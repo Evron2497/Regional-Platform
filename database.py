@@ -186,7 +186,6 @@
 
 
 
-
 import sqlite3
 
 def get_db():
@@ -325,7 +324,7 @@ def check_meetup_status(profile_id):
 
 # --- MANUAL & ADMIN TRANSACTION VERIFICATION HELPERS ---
 
-def log_manual_transaction_submission(tx_id, profile_id, account_ref, amount, payment_type):
+def submit_manual_transaction(tx_id, profile_id, account_ref, amount, payment_type):
     """Inserts a transaction entry directly from the manual code submitted by client"""
     conn = get_db()
     tx_id = tx_id.strip().upper()
@@ -335,12 +334,25 @@ def log_manual_transaction_submission(tx_id, profile_id, account_ref, amount, pa
             VALUES (?, ?, ?, ?, ?, 'pending')
         """, (tx_id, profile_id, account_ref, amount, payment_type))
         conn.commit()
+        return True
     except sqlite3.IntegrityError:
-        pass # Code was already posted before
+        return False  # Code was already posted before
     finally:
         conn.close()
 
-def admin_confirm_transaction_payment(tx_id):
+def get_pending_verifications():
+    """Fetches all raw client transactions awaiting administrative approval"""
+    conn = get_db()
+    rows = conn.execute("""
+        SELECT t.*, p.name as profile_name 
+        FROM transactions t
+        LEFT JOIN profiles p ON t.profile_id = p.id
+        WHERE t.status = 'pending'
+    """).fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def admin_approve_transaction(tx_id):
     """Called when an admin hits approve in their workspace notifications dashboard"""
     conn = get_db()
     tx_id = tx_id.strip().upper()
@@ -362,7 +374,7 @@ def claim_and_verify_transaction(tx_id, profile_id, search_type="chat"):
     elif search_type == "meetup":
         expected_ref = f"446040-MEE{profile_id}"
     else:
-        expected_ref = f"446040-SUB{profile_id}"
+        expected_ref = "446040-SUB"
         
     row = conn.execute(
         "SELECT 1 FROM transactions WHERE transaction_id = ? AND account_ref = ? AND type = ? AND status = 'completed'", 
