@@ -49,8 +49,8 @@
 # def add_single_profile(name, continent, country, bio, chat_rate, meetup_rate, photo_url):
 #     conn = get_db()
 #     conn.execute("""
-#         INSERT INTO profiles (name, continent, country, bio, chat_rate, meetup_rate, photo_url) 
-#         VALUES (?, ?, ?, ?, ?, ?, ?)
+#         INSERT INTO profiles (name, continent, country, bio, chat_rate, meetup_rate, photo_url, status) 
+#         VALUES (?, ?, ?, ?, ?, ?, ?, 'browsing')
 #     """, (name, continent, country, bio, chat_rate, meetup_rate, photo_url))
 #     conn.commit()
 #     conn.close()
@@ -84,9 +84,13 @@
 #     return row
 
 # def get_available_profiles():
-#     """Returns profiles available for initial connection"""
+#     """Returns ONLY profiles currently available for browsing (hides booked profiles)"""
 #     conn = get_db()
-#     rows = conn.execute("SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status FROM profiles").fetchall()
+#     rows = conn.execute("""
+#         SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status 
+#         FROM profiles 
+#         WHERE status = 'browsing'
+#     """).fetchall()
 #     conn.close()
     
 #     profiles = []
@@ -130,7 +134,8 @@
 #     conn = get_db()
 #     row = conn.execute("SELECT status FROM profiles WHERE id = ?", (profile_id,)).fetchone()
 #     conn.close()
-#     if row and row['status'] == 'approved':
+#     # Returns True if approved or booked to keep private session flows open
+#     if row and row['status'] in ('approved', 'booked'):
 #         return True
 #     return False
 
@@ -196,7 +201,6 @@
 #     conn.close()
 #     return row is not None
 
-
 import sqlite3
 
 def get_db():
@@ -245,12 +249,16 @@ def init_db():
 
 # --- PROFILE CRUD MANAGEMENT ---
 
-def add_single_profile(name, continent, country, bio, chat_rate, meetup_rate, photo_url):
+def add_single_profile(name, continent, country, bio, chat_rate, meetup_rate, photo_url, status='browsing'):
+    """
+    Inserts a user profile record. 
+    Defaults to 'browsing' for direct Admin entries, override with 'pending_approval' for client forms.
+    """
     conn = get_db()
     conn.execute("""
         INSERT INTO profiles (name, continent, country, bio, chat_rate, meetup_rate, photo_url, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'browsing')
-    """, (name, continent, country, bio, chat_rate, meetup_rate, photo_url))
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (name, continent, country, bio, chat_rate, meetup_rate, photo_url, status))
     conn.commit()
     conn.close()
 
@@ -283,7 +291,7 @@ def get_single_profile_rates(profile_id: int):
     return row
 
 def get_available_profiles():
-    """Returns ONLY profiles currently available for browsing (hides booked profiles)"""
+    """Returns ONLY profiles currently available for browsing (hides booked or pending approvals)"""
     conn = get_db()
     rows = conn.execute("""
         SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status 
