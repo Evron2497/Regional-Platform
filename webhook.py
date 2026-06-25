@@ -93,7 +93,7 @@ async def log_manual_transaction(payload: ManualTransactionRequest):
     elif payload.payment_type == "meetup":
         account_ref = f"446040-MEE{payload.profile_id}"
     else:
-        account_ref = f"446040-SUB{payload.profile_id}"
+        account_ref = "446040-SUB"
 
     try:
         conn.execute("""
@@ -134,7 +134,7 @@ async def connect_user_profile(payload: ConnectRequest):
     elif payload.payment_type == "meetup":
         account_ref = f"446040-MEE{payload.profile_id}"
     else:
-        account_ref = f"446040-SUB{payload.profile_id}"
+        account_ref = "446040-SUB"
 
     stk_body = {
         "BusinessShortCode": MPESA_SHORTCODE,
