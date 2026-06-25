@@ -4,11 +4,8 @@
 # import uuid
 # import base64
 # import requests  # Added to make requests to your FastAPI M-Pesa backend
-
-
 # import subprocess
 # import time
-# import os
 
 # # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 # # This forces FastAPI to run as a quiet background process on port 8000 inside the same container
@@ -105,7 +102,6 @@
 #     </div>
 # """, unsafe_allow_html=True)
 
-# # --- APP LOGIC ---# --- APP LOGIC ---
 # # --- APP LOGIC ---
 # if "selected" not in st.session_state:
 #     # --- MARKETPLACE ---
@@ -234,8 +230,64 @@
 #                 st.warning("Meetup remittance confirmed processing backend. Awaiting operational administrative assignment authorization.")
 #                 st.stop()
 
-# # --- ADMIN SIDEBAR ---
+# # --- SIDEBAR CONTENT PANEL ---
 # with st.sidebar:
+#     # ========================================================
+#     # FEATURE IMPLEMENTATION: CLIENT PROFILE SUBMISSION BOX
+#     # ========================================================
+#     st.header("✨ Add Your Profile Display")
+#     st.markdown("""
+#     <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px solid #ff1493; color: black; font-size:13px; margin-bottom:10px;">
+#         📢 <b>Want your profile listed?</b> Fill in your display details. Submission costs a standard verification processing fee of <b>KES 100.00</b>.
+#     </div>
+#     """, unsafe_allow_html=True)
+    
+#     with st.expander("📝 Fill Submission Form", expanded=False):
+#         sub_name = st.text_input("Display Name", key="sub_name")
+#         sub_cont = st.selectbox("Continent Location", ["Africa", "America", "Europe", "Asia"], key="sub_cont")
+#         sub_coun = st.text_input("Country Location", key="sub_coun")
+#         sub_bio = st.text_area("Short Bio/Intro", key="sub_bio")
+#         sub_img = st.file_uploader("Upload Profile Image", type=['png', 'jpg'], key="sub_img")
+        
+#         st.divider()
+#         st.markdown("**💳 M-Pesa Checkout Engine**")
+#         sub_phone = st.text_input("📱 M-Pesa Phone Number:", key="sub_phone_input", placeholder="07XXXXXXXX").strip()
+        
+#         if st.button("🚀 Pay KES 100 via STK Push", key="sub_pay_btn"):
+#             if not sub_name or not sub_phone:
+#                 st.warning("Please fill in your name and a valid Safaricom phone number to trigger payments.")
+#             else:
+#                 with st.spinner("Dispatching secure payment API line..."):
+#                     # profile_id is 0 because the entry has not yet been logged into database row layout
+#                     res = trigger_stk_push(sub_phone, 0, 100, "profile_submission")
+#                     if res.get("status") == "initiated":
+#                         st.success("✅ STK prompt dispatched! Approve the prompt on your handset, wait 5 seconds, then verify below.")
+#                     else:
+#                         st.error(f"Failed to initiate transaction: {res.get('message')}")
+                        
+#         st.divider()
+#         sub_tx_id = st.text_input("Verification Step: Paste M-Pesa Code", key="sub_tx_verify").strip()
+        
+#         if st.button("🔓 Complete & Submit Profile", key="sub_verify_btn"):
+#             if not sub_tx_id or not sub_name:
+#                 st.error("Please ensure your name is written and your transaction code is copied accurately.")
+#             else:
+#                 if db.claim_and_verify_transaction(sub_tx_id, 0, "profile_submission"):
+#                     f_url = save_uploaded_file(sub_img) if sub_img else "https://via.placeholder.com/150"
+                    
+#                     # Adds to the database with standard placeholder rates (Admin can edit these anytime later)
+#                     db.add_single_profile(sub_name, sub_cont, sub_coun, sub_bio, 150.0, 2000.0, f_url)
+#                     st.success("🎉 Payment verified! Your new profile has been added to the main display roster successfully.")
+#                     time.sleep(2)
+#                     st.rerun()
+#                 else:
+#                     st.error("Could not find a successful matching transaction code reference entry.")
+
+#     st.divider()
+
+#     # ========================================================
+#     # SYSTEM CONTROL: EXISTING ADMIN PRIVILEGED MANAGEMENT PANEL
+#     # ========================================================
 #     st.header("Admin Management")
 #     if not st.session_state.admin_logged_in:
 #         pwd = st.text_input("Password", type="password", key="admin_pwd_entry")
@@ -293,7 +345,7 @@
 #                     st.rerun()
         
 #         st.divider()
-#         with st.expander("➕ Add New Client"):
+#         with st.expander("➕ Add New Client Manually"):
 #             new_name = st.text_input("Name", key="new_name_in")
 #             col1, col2 = st.columns(2)
 #             with col1:
@@ -320,6 +372,7 @@
 #     Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
 #     </div>
 # """, unsafe_allow_html=True)
+
 
 
 
@@ -367,9 +420,15 @@ def save_uploaded_file(uploaded_file):
 def trigger_stk_push(phone_number, profile_id, amount, payment_type):
     """Helper to dispatch the STK push payload request over to the FastAPI engine"""
     url = f"{FASTAPI_BACKEND_URL}/mpesa/stk-push"
+    
+    # Dynamic Account Reference linking your base business account with the specific profile action
+    account_reference = f"446040-{payment_type[:3].upper()}{profile_id}"
+    
     payload = {
         "phone_number": phone_number,
         "amount": int(amount),
+        "paybill": "542542",                     # Your exact paybill configuration
+        "account_number": account_reference,      # Generates e.g., 446040-CHA12
         "profile_id": int(profile_id),
         "payment_type": payment_type
     }
@@ -438,10 +497,8 @@ if "selected" not in st.session_state:
         cols = st.columns(3) 
         for idx, p in enumerate(profiles):
             with cols[idx % 3]:
-                # Safely handle dictionary conversions
                 profile_dict = dict(p) if not isinstance(p, dict) else p
                 
-                # Use .get() with a default fallback of 0.0 to prevent any IndexError crashes
                 chat_rate = profile_dict.get('chat_rate', profile_dict.get('rate', 0.0))
                 meetup_rate = profile_dict.get('meetup_rate', 0.0)
                 
@@ -466,10 +523,13 @@ else:
     if p['id'] not in st.session_state.verified_chats:
         st.markdown(f"""
         <div class="pay-box">
-            <h3>💰 Dynamic STK Push Checkout Required</h3>
-            <p>Enter your phone number below to receive an automated M-Pesa PIN prompt dialog directly on your phone.</p>
-            Service Selected: <b>Secure Direct Chat Line</b><br>
-            Amount: <b>KES {p["chat_rate"]:.2f}</b>
+            <h3>💰 Lipa Na M-Pesa Paybill Checkout Required</h3>
+            <p>Enter your phone number below to receive an automated secure payment confirmation screen directly on your device.</p>
+            <b>Payment Destination:</b> Lipa Na IMBANK<br>
+            <b>Business Paybill:</b> 542542<br>
+            <b>Account Target:</b> 446040-CHA{p['id']}<br>
+            <b>Service Selected:</b> Secure Direct Chat Line<br>
+            <b>Amount:</b> KES {p["chat_rate"]:.2f}
         </div>
         """, unsafe_allow_html=True)
         
@@ -518,13 +578,14 @@ else:
         st.caption(f"Progress: {st.session_state[u_k]}/10")
         
         if st.session_state[u_k] >= 10:
-            # GATEKEEPER: REQUEST PHONE AND TRIGGER M-PESA POPUP FOR MEETUP
             if p['id'] not in st.session_state.verified_meetups:
                 st.markdown(f"""
                 <div class="pay-box">
                     <h3>🤝 Goal Unlocked: Authorize Meetup Routing</h3>
                     <p>Enter your phone number to receive an active prompt to process the physical rendezvous logistics fee.</p>
-                    Amount: <b>KES {p['meetup_rate']:.2f}</b>
+                    <b>Business Paybill:</b> 542542<br>
+                    <b>Account Target:</b> 446040-MEE{p['id']}<br>
+                    <b>Amount:</b> KES {p['meetup_rate']:.2f}
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -557,13 +618,10 @@ else:
 
 # --- SIDEBAR CONTENT PANEL ---
 with st.sidebar:
-    # ========================================================
-    # FEATURE IMPLEMENTATION: CLIENT PROFILE SUBMISSION BOX
-    # ========================================================
     st.header("✨ Add Your Profile Display")
     st.markdown("""
     <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px solid #ff1493; color: black; font-size:13px; margin-bottom:10px;">
-        📢 <b>Want your profile listed?</b> Fill in your display details. Submission costs a standard verification processing fee of <b>KES 100.00</b>.
+        📢 <b>Want your profile listed?</b> Fill in your display details. Submission costs a standard verification processing fee of <b>KES 100.00</b> via Paybill 542542.
     </div>
     """, unsafe_allow_html=True)
     
@@ -575,7 +633,7 @@ with st.sidebar:
         sub_img = st.file_uploader("Upload Profile Image", type=['png', 'jpg'], key="sub_img")
         
         st.divider()
-        st.markdown("**💳 M-Pesa Checkout Engine**")
+        st.markdown("**💳 M-Pesa Paybill Checkout**")
         sub_phone = st.text_input("📱 M-Pesa Phone Number:", key="sub_phone_input", placeholder="07XXXXXXXX").strip()
         
         if st.button("🚀 Pay KES 100 via STK Push", key="sub_pay_btn"):
@@ -583,7 +641,6 @@ with st.sidebar:
                 st.warning("Please fill in your name and a valid Safaricom phone number to trigger payments.")
             else:
                 with st.spinner("Dispatching secure payment API line..."):
-                    # profile_id is 0 because the entry has not yet been logged into database row layout
                     res = trigger_stk_push(sub_phone, 0, 100, "profile_submission")
                     if res.get("status") == "initiated":
                         st.success("✅ STK prompt dispatched! Approve the prompt on your handset, wait 5 seconds, then verify below.")
@@ -599,8 +656,6 @@ with st.sidebar:
             else:
                 if db.claim_and_verify_transaction(sub_tx_id, 0, "profile_submission"):
                     f_url = save_uploaded_file(sub_img) if sub_img else "https://via.placeholder.com/150"
-                    
-                    # Adds to the database with standard placeholder rates (Admin can edit these anytime later)
                     db.add_single_profile(sub_name, sub_cont, sub_coun, sub_bio, 150.0, 2000.0, f_url)
                     st.success("🎉 Payment verified! Your new profile has been added to the main display roster successfully.")
                     time.sleep(2)
@@ -610,9 +665,7 @@ with st.sidebar:
 
     st.divider()
 
-    # ========================================================
-    # SYSTEM CONTROL: EXISTING ADMIN PRIVILEGED MANAGEMENT PANEL
-    # ========================================================
+    # Admin Privileged Management Panel
     st.header("Admin Management")
     if not st.session_state.admin_logged_in:
         pwd = st.text_input("Password", type="password", key="admin_pwd_entry")
@@ -632,11 +685,11 @@ with st.sidebar:
         
         all_profiles = db.get_profiles()
 
-        # 1. System Managed Meetups Override
         st.markdown("**Pending Meetups Approvals:**")
         found_meetup = False
         for p in all_profiles:
-            account_string = f"MEET016536{p['id']}"
+            # Replaced with Paybill structural string references matching your account profile logic
+            account_string = f"446040-MEE{p['id']}"
             conn = db.get_db()
             has_paid_meet = conn.execute("SELECT 1 FROM transactions WHERE account_ref = ? AND type = 'meetup' AND status = 'completed'", (account_string,)).fetchone()
             conn.close()
