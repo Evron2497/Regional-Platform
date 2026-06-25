@@ -273,21 +273,9 @@ def get_single_profile_rates(profile_id: int):
     return row
 
 def get_available_profiles():
-    """Fixes IndexError by forcing strict column naming and dictionary structures"""
+    """Returns profiles available for initial connection"""
     conn = get_db()
-    
-    # Updated to look for the new Paybill Account Reference format
-    query = """
-        SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status 
-        FROM profiles p 
-        WHERE NOT EXISTS (
-            SELECT 1 FROM transactions t 
-            WHERE t.account_ref = '446040-CHA' || p.id 
-            AND t.type = 'chat' 
-            AND t.status = 'completed'
-        )
-    """
-    rows = conn.execute(query).fetchall()
+    rows = conn.execute("SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status FROM profiles").fetchall()
     conn.close()
     
     profiles = []
@@ -335,34 +323,40 @@ def check_meetup_status(profile_id):
         return True
     return False
 
-# --- STK PUSH FLOW RECONCILIATION HELPERS ---
+# --- MANUAL & ADMIN TRANSACTION VERIFICATION HELPERS ---
 
-def create_pending_transaction(merchant_request_id, profile_id, account_ref, amount, payment_type):
-    """Logs the checkout initiation right when the prompt fires onto the phone handset"""
+def log_manual_transaction_submission(tx_id, profile_id, account_ref, amount, payment_type):
+    """Inserts a transaction entry directly from the manual code submitted by client"""
     conn = get_db()
-    conn.execute("""
-        INSERT INTO transactions (merchant_request_id, profile_id, account_ref, amount, type, status)
-        VALUES (?, ?, ?, ?, ?, 'pending')
-    """, (merchant_request_id, profile_id, account_ref, amount, payment_type))
-    conn.commit()
-    conn.close()
+    tx_id = tx_id.strip().upper()
+    try:
+        conn.execute("""
+            INSERT INTO transactions (transaction_id, profile_id, account_ref, amount, type, status)
+            VALUES (?, ?, ?, ?, ?, 'pending')
+        """, (tx_id, profile_id, account_ref, amount, payment_type))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        pass # Code was already posted before
+    finally:
+        conn.close()
 
-def complete_stk_transaction(merchant_request_id, transaction_id):
-    """Updates status to completed when Safaricom sends a success webhook callback response"""
+def admin_confirm_transaction_payment(tx_id):
+    """Called when an admin hits approve in their workspace notifications dashboard"""
     conn = get_db()
+    tx_id = tx_id.strip().upper()
     conn.execute("""
         UPDATE transactions 
-        SET transaction_id = ?, status = 'completed' 
-        WHERE merchant_request_id = ?
-    """, (transaction_id, merchant_request_id))
+        SET status = 'completed' 
+        WHERE transaction_id = ?
+    """, (tx_id,))
     conn.commit()
     conn.close()
 
 def claim_and_verify_transaction(tx_id, profile_id, search_type="chat"):
+    """Checks the database to see if the transaction has been approved/completed by the Admin"""
     conn = get_db()
     tx_id = tx_id.strip().upper()
     
-    # Standardizing references to map the structural payload variables sent from frontend
     if search_type == "chat":
         expected_ref = f"446040-CHA{profile_id}"
     elif search_type == "meetup":
