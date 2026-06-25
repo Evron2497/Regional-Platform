@@ -374,6 +374,340 @@
 # """, unsafe_allow_html=True)
 
 
+# import streamlit as st
+# import database as db
+# import os
+# import uuid
+# import base64
+# import requests  
+# import subprocess
+# import time
+
+# # --- EMBEDDED BACKEND BOOTSTRAPPER ---
+# if "backend_started" not in st.session_state:
+#     try:
+#         subprocess.Popen([
+#             "uvicorn", "main:app", 
+#             "--host", "127.0.0.1", 
+#             "--port", "8000"
+#         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+#         st.session_state.backend_started = True
+#         time.sleep(2) 
+#     except Exception as e:
+#         st.error(f"Internal wrapper failed to spin up background API gateway: {e}")
+
+# # --- PAGE CONFIG ---
+# st.set_page_config(layout="wide", page_title="TECH-STAR")
+# db.init_db()
+
+# FASTAPI_BACKEND_URL = "http://127.0.0.1:8000" 
+
+# # --- FUNCTION DEFINITIONS ---
+# def save_uploaded_file(uploaded_file):
+#     if not os.path.exists("uploads"): 
+#         os.makedirs("uploads")
+#     file_path = os.path.join("uploads", f"{uuid.uuid4()}_{uploaded_file.name}")
+#     with open(file_path, "wb") as f: 
+#         f.write(uploaded_file.getbuffer())
+#     return file_path
+
+# # --- STATE ---
+# if "admin_logged_in" not in st.session_state: 
+#     st.session_state.admin_logged_in = False
+
+# if "verified_chats" not in st.session_state:
+#     st.session_state.verified_chats = set()
+
+# if "verified_meetups" not in st.session_state:
+#     st.session_state.verified_meetups = set()
+
+# if "admin_notifications" not in st.session_state:
+#     st.session_state.admin_notifications = []
+
+# # --- CSS ---
+# st.markdown("""
+#     <style>
+#     [data-testid="stHeader"] {
+#         background-color: rgba(0, 0, 0, 0) !important;
+#         height: 0px !important;
+#     }
+#     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
+#     .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
+#     .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
+#     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
+#     .welcome-banner { text-align: center; background-color: #fff0f5; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+#     </style> 
+# """, unsafe_allow_html=True)
+
+# # --- TOP NAVBAR ---
+# col1, col2, col3 = st.columns([1, 4, 2])
+# with col1:
+#     img_path = "LOVE-IS-REAL.jpg"
+#     if os.path.exists(img_path):
+#         st.markdown(f'<div style="overflow:hidden; border-radius:50%; width:90px; height:90px;"><img src="data:image/jpeg;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" width="90" height="90" style="object-fit:cover;"></div>', unsafe_allow_html=True)
+#     else:
+#         st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=90)
+# with col2:
+#     st.markdown('<div class="navbar"><h2>MEET WITH YOUR FAVORITE LOVE ❤️</h2></div>', unsafe_allow_html=True)
+# with col3:
+#     st.markdown("📞 **Help:** +254728831770 <br> 📧 Support Center", unsafe_allow_html=True)
+
+# # --- WELCOME BANNER ---
+# st.markdown("""
+#     <div class="welcome-banner">
+#         <h2>🌍 Welcome to Regional Dating Platform</h2>
+#         <p>Connect, Chat, and Build Meaningful Relationships Worldwide ❤️</p>
+#     </div>
+# """, unsafe_allow_html=True)
+
+# # --- APP LOGIC ---
+# if "selected" not in st.session_state:
+#     # --- MARKETPLACE ---
+#     profiles = db.get_available_profiles()
+    
+#     if not profiles:
+#         st.info("✨ All profiles are currently in active sessions. Please check back shortly!")
+#     else:
+#         cols = st.columns(3) 
+#         for idx, p in enumerate(profiles):
+#             with cols[idx % 3]:
+#                 profile_dict = dict(p) if not isinstance(p, dict) else p
+                
+#                 chat_rate = profile_dict.get('chat_rate', profile_dict.get('rate', 0.0))
+#                 meetup_rate = profile_dict.get('meetup_rate', 0.0)
+                
+#                 st.image(profile_dict['photo_url'], width='stretch')
+#                 st.write(f"### {profile_dict['name']}")
+#                 st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
+#                 st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
+#                 st.write(f"🤝 **Meetup Rate:** KES {meetup_rate:.2f}")
+                
+#                 if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
+#                     st.session_state.selected = profile_dict
+#                     st.rerun()
+# else:
+#     # --- PRIVATE SESSION ---
+#     p = st.session_state.selected
+#     st.title(f"🔒 Session: {p['name']}")
+#     if st.button("⬅️ Back"):
+#         del st.session_state.selected
+#         st.rerun()
+    
+#     # 1. GATEKEEPER: CHAT PAYMENT ACCOUNT DETAILS
+#     if p['id'] not in st.session_state.verified_chats:
+#         st.markdown(f"""
+#         <div class="pay-box">
+#             <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
+#             <p>To unlock your direct secure chat line, make a manual payment using the billing details below:</p>
+#             <hr>
+#             <b>1. Go to M-PESA Menu</b><br>
+#             <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
+#             <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
+#             <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040-CHA{p['id']}</span><br>
+#             <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
+#             <hr>
+#             <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
+#         </div>
+#         """, unsafe_allow_html=True)
+        
+#         fallback_tx_id = st.text_input("Verification Step: Paste M-Pesa Transaction ID (e.g., SFT712XYZ0):", key=f"tx_chat_{p['id']}").strip().upper()
+        
+#         if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
+#             if fallback_tx_id:
+#                 notification = {"tx_id": fallback_tx_id, "profile_id": p['id'], "type": "chat", "name": p['name']}
+#                 if notification not in st.session_state.admin_notifications:
+#                     st.session_state.admin_notifications.append(notification)
+#                 st.info("🕒 Code submitted! Please wait for an Admin to verify and accept your payment.")
+#             else:
+#                 st.warning("Please paste a valid transaction ID before submitting.")
+        
+#         if any(n['tx_id'] == fallback_tx_id and n['type'] == 'chat' for n in st.session_state.admin_notifications if fallback_tx_id):
+#             st.warning("⏳ Access Status: Awaiting Admin Approval. Click refresh below to update your line link status.")
+#             if st.button("🔄 Refresh Status Window"):
+#                 st.rerun()
+#         st.stop()
+
+#     # 2. CHAT & MEETUP FLOW
+#     is_meetup_approved = db.check_meetup_status(p['id'])
+    
+#     if is_meetup_approved:
+#         st.success("✅ Meetup Approved! Target logistical coordinates sent.")
+#     else:
+#         u_k = f"u_{p['id']}"
+#         st.session_state[u_k] = st.session_state.get(u_k, 0)
+        
+#         msg = st.chat_input("Secure message...")
+#         if msg:
+#             st.session_state[u_k] += 1
+#             st.chat_message("user").write(msg)
+#             st.chat_message("assistant").write("Secure response.")
+#             st.rerun()
+        
+#         st.caption(f"Progress: {st.session_state[u_k]}/10")
+        
+#         if st.session_state[u_k] >= 10:
+#             if p['id'] not in st.session_state.verified_meetups:
+#                 st.markdown(f"""
+#                 <div class="pay-box">
+#                     <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
+#                     <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
+#                     <hr>
+#                     <b>1. Paybill Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span><br>
+#                     <b>2. Account Reference Target:</b> <span style="color:#ff1493; font-weight:bold;">446040-MEE{p['id']}</span><br>
+#                     <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p['meetup_rate']:.2f}</span><br>
+#                     <hr>
+#                     <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
+#                 </div>
+#                 """, unsafe_allow_html=True)
+                
+#                 fallback_meet_tx = st.text_input("Enter Meetup Payment Transaction ID to unlock:", key=f"tx_meet_{p['id']}").strip().upper()
+                
+#                 if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
+#                     if fallback_meet_tx:
+#                         notification = {"tx_id": fallback_meet_tx, "profile_id": p['id'], "type": "meetup", "name": p['name']}
+#                         if notification not in st.session_state.admin_notifications:
+#                             st.session_state.admin_notifications.append(notification)
+#                         st.info("🕒 Meetup registration sent. Awaiting Admin clearance review.")
+#                     else:
+#                         st.warning("Please specify an operational Transaction reference string.")
+                
+#                 if any(n['tx_id'] == fallback_meet_tx and n['type'] == 'meetup' for n in st.session_state.admin_notifications if fallback_meet_tx):
+#                     st.warning("⏳ Awaiting Administrative Approval for physical routing activation parameters.")
+#                     if st.button("🔄 Check Authorization Status"):
+#                         st.rerun()
+#                 st.stop()
+#             else:
+#                 st.warning("Meetup remittance confirmed processing backend. Awaiting operational administrative assignment authorization.")
+#                 st.stop()
+
+# # --- SIDEBAR CONTENT PANEL ---
+# with st.sidebar:
+#     st.header("✨ Add Your Profile Display")
+#     st.markdown("""
+#     <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px solid #ff1493; color: black; font-size:13px; margin-bottom:10px;">
+#         📢 <b>Want your profile listed?</b> Fill registration metrics. Submission processing fee costs <b>KES 100.00</b> sent manually to <b>Paybill: 542542</b>, <b>Account No: 446040</b>.
+#     </div>
+#     """, unsafe_allow_html=True)
+    
+#     with st.expander("📝 Fill Submission Form", expanded=False):
+#         sub_name = st.text_input("Display Name", key="sub_name")
+#         sub_cont = st.selectbox("Continent Location", ["Africa", "America", "Europe", "Asia"], key="sub_cont")
+#         sub_coun = st.text_input("Country Location", key="sub_coun")
+#         sub_bio = st.text_area("Short Bio/Intro", key="sub_bio")
+#         sub_img = st.file_uploader("Upload Profile Image", type=['png', 'jpg'], key="sub_img")
+        
+#         st.divider()
+#         sub_tx_id = st.text_input("Verification Step: Paste M-Pesa Code", key="sub_tx_verify").strip().upper()
+        
+#         if st.button("🔓 Submit Profile for Verification", key="sub_verify_btn"):
+#             if not sub_tx_id or not sub_name:
+#                 st.error("Please ensure your name is written and your transaction code is copied accurately.")
+#             else:
+#                 notification = {"tx_id": sub_tx_id, "profile_id": 0, "type": "profile_submission", "name": sub_name, "form_data": {"name": sub_name, "cont": sub_cont, "coun": sub_coun, "bio": sub_bio, "img": sub_img}}
+#                 if notification not in st.session_state.admin_notifications:
+#                     st.session_state.admin_notifications.append(notification)
+#                 st.info("📨 Form data and reference code submitted to Admin panel queue.")
+
+#     st.divider()
+
+#     # --- ADMIN PRIVILEGED MANAGEMENT PANEL ---
+#     st.header("Admin Management")
+#     if not st.session_state.admin_logged_in:
+#         pwd = st.text_input("Password", type="password", key="admin_pwd_entry")
+#         if st.button("Login"):
+#             if pwd == st.secrets["ADMIN_PASSWORD"]:
+#                 st.session_state.admin_logged_in = True
+#                 st.rerun()
+#             else:
+#                 st.error("Incorrect Password")
+#     else:
+#         if st.button("Logout"):
+#             st.session_state.admin_logged_in = False
+#             st.rerun()
+
+#         st.divider()
+#         st.subheader("🔍 Pending Client Verifications")
+        
+#         if not st.session_state.admin_notifications:
+#             st.write("No incoming verification claims.")
+#         else:
+#             for idx, note in enumerate(st.session_state.admin_notifications):
+#                 st.markdown(f"""
+#                 📌 **Type:** `{note['type'].upper()}` | **Target Client:** {note['name']}<br>
+#                 💵 **Code Claimed:** `{note['tx_id']}`
+#                 """, unsafe_allow_html=True)
+                
+#                 if st.button(f"Approve & Unlock Entry {idx}", key=f"approve_note_{idx}"):
+#                     if note['type'] == "chat":
+#                         st.session_state.verified_chats.add(note['profile_id'])
+#                     elif note['type'] == "meetup":
+#                         db.approve_meetup(note['profile_id'])
+#                         st.session_state.verified_meetups.add(note['profile_id'])
+#                     elif note['type'] == "profile_submission":
+#                         fd = note['form_data']
+#                         f_url = save_uploaded_file(fd['img']) if fd['img'] else "https://via.placeholder.com/150"
+#                         db.add_single_profile(fd['name'], fd['cont'], fd['coun'], fd['bio'], 150.0, 2000.0, f_url)
+                    
+#                     st.session_state.admin_notifications.pop(idx)
+#                     st.success("Authorized successfully!")
+#                     st.rerun()
+#                 st.divider()
+
+#         # --- RESTORED: ADD NEW CLIENT MANUALLY ---
+#         st.subheader("➕ Create Client Account")
+#         with st.expander("Manually Provision New Client Profile", expanded=False):
+#             new_name = st.text_input("Name", key="new_name_in")
+#             col1, col2 = st.columns(2)
+#             with col1:
+#                 new_cont = st.selectbox("Continent", ["Africa", "America", "Europe", "Asia"], key="new_cont_in")
+#                 new_chat_rate = st.number_input("Chat Rate (KES)", min_value=0.0, key="new_ch_rate_in")
+#             with col2:
+#                 new_coun = st.text_input("Country", key="new_coun_in")
+#                 new_meet_rate = st.number_input("Meetup Rate (KES)", min_value=0.0, key="new_mt_rate_in")
+            
+#             new_up = st.file_uploader("Upload Image Asset", type=['png', 'jpg'], key="new_add_img")
+#             new_bio = st.text_area("Bio/Description Parameters", "Enter bio here...", key="new_bio_in")
+            
+#             if st.button("Save New Client", key="save_manual_client_btn"):
+#                 if not new_name:
+#                     st.error("A profile must have an assigned name label.")
+#                 else:
+#                     photo_url = save_uploaded_file(new_up) if new_up else "https://via.placeholder.com/150"
+#                     db.add_single_profile(new_name, new_cont, new_coun, new_bio, new_chat_rate, new_meet_rate, photo_url)
+#                     st.success(f"Added {new_name} successfully!")
+#                     st.rerun()
+
+#         st.divider()
+#         st.subheader("📋 Client Directory")
+#         all_profiles = db.get_profiles()
+#         for p in all_profiles:
+#             with st.expander(f"👤 {p['name']} (ID: {p['id']})"):
+#                 n_n = st.text_input("Name", value=p['name'], key=f"en_{p['id']}")
+#                 n_cr = st.number_input("Chat Rate (KES)", value=float(p['chat_rate']), key=f"ecr_{p['id']}")
+#                 n_mr = st.number_input("Meetup Rate (KES)", value=float(p['meetup_rate']), key=f"emr_{p['id']}")
+#                 up = st.file_uploader(f"Upload image for {p['name']}", type=['png', 'jpg'], key=f"up_{p['id']}")
+                
+#                 if st.button(f"Update {p['name']}", key=f"upd_{p['id']}"):
+#                     f_u = save_uploaded_file(up) if up else p['photo_url']
+#                     db.update_profile(p['id'], n_n, p['continent'], p['country'], p['bio'], n_cr, n_mr, f_u)
+#                     st.success(f"Updated {p['name']}!")
+#                     st.rerun()
+                
+#                 if st.button(f"Delete {p['name']}", key=f"del_{p['id']}"):
+#                     db.delete_profile(p['id'])
+#                     st.success(f"Deleted {p['name']}!")
+#                     st.rerun()
+
+# # --- FOOTER ---
+# st.markdown("---")
+# st.markdown("""
+#     <div style="text-align: center; color: grey; font-size: 12px; margin-top: 50px;">
+#     &copy; 2026 TECH-STAR Regional Dating Platform. All rights reserved. <br>
+#     Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
+#     </div>
+# """, unsafe_allow_html=True)
+
+
 import streamlit as st
 import database as db
 import os
@@ -414,15 +748,6 @@ def save_uploaded_file(uploaded_file):
 # --- STATE ---
 if "admin_logged_in" not in st.session_state: 
     st.session_state.admin_logged_in = False
-
-if "verified_chats" not in st.session_state:
-    st.session_state.verified_chats = set()
-
-if "verified_meetups" not in st.session_state:
-    st.session_state.verified_meetups = set()
-
-if "admin_notifications" not in st.session_state:
-    st.session_state.admin_notifications = []
 
 # --- CSS ---
 st.markdown("""
@@ -493,8 +818,13 @@ else:
         del st.session_state.selected
         st.rerun()
     
-    # 1. GATEKEEPER: CHAT PAYMENT ACCOUNT DETAILS
-    if p['id'] not in st.session_state.verified_chats:
+    # 1. GATEKEEPER: CHAT TRANSACTION VALIDATION
+    chat_input_tracker_key = f"entered_tx_chat_{p['id']}"
+    tracked_chat_code = st.session_state.get(chat_input_tracker_key, "").strip().upper()
+    
+    is_chat_unlocked = db.claim_and_verify_transaction(tracked_chat_code, p['id'], "chat") if tracked_chat_code else False
+
+    if not is_chat_unlocked:
         st.markdown(f"""
         <div class="pay-box">
             <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
@@ -514,14 +844,13 @@ else:
         
         if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
             if fallback_tx_id:
-                notification = {"tx_id": fallback_tx_id, "profile_id": p['id'], "type": "chat", "name": p['name']}
-                if notification not in st.session_state.admin_notifications:
-                    st.session_state.admin_notifications.append(notification)
-                st.info("🕒 Code submitted! Please wait for an Admin to verify and accept your payment.")
+                db.submit_manual_transaction(fallback_tx_id, p['id'], f"446040-CHA{p['id']}", p['chat_rate'], "chat")
+                st.session_state[chat_input_tracker_key] = fallback_tx_id
+                st.rerun()
             else:
                 st.warning("Please paste a valid transaction ID before submitting.")
         
-        if any(n['tx_id'] == fallback_tx_id and n['type'] == 'chat' for n in st.session_state.admin_notifications if fallback_tx_id):
+        if tracked_chat_code:
             st.warning("⏳ Access Status: Awaiting Admin Approval. Click refresh below to update your line link status.")
             if st.button("🔄 Refresh Status Window"):
                 st.rerun()
@@ -546,7 +875,12 @@ else:
         st.caption(f"Progress: {st.session_state[u_k]}/10")
         
         if st.session_state[u_k] >= 10:
-            if p['id'] not in st.session_state.verified_meetups:
+            meet_input_tracker_key = f"entered_tx_meet_{p['id']}"
+            tracked_meet_code = st.session_state.get(meet_input_tracker_key, "").strip().upper()
+            
+            is_meet_unlocked = db.claim_and_verify_transaction(tracked_meet_code, p['id'], "meetup") if tracked_meet_code else False
+            
+            if not is_meet_unlocked:
                 st.markdown(f"""
                 <div class="pay-box">
                     <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
@@ -564,20 +898,16 @@ else:
                 
                 if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
                     if fallback_meet_tx:
-                        notification = {"tx_id": fallback_meet_tx, "profile_id": p['id'], "type": "meetup", "name": p['name']}
-                        if notification not in st.session_state.admin_notifications:
-                            st.session_state.admin_notifications.append(notification)
-                        st.info("🕒 Meetup registration sent. Awaiting Admin clearance review.")
+                        db.submit_manual_transaction(fallback_meet_tx, p['id'], f"446040-MEE{p['id']}", p['meetup_rate'], "meetup")
+                        st.session_state[meet_input_tracker_key] = fallback_meet_tx
+                        st.rerun()
                     else:
                         st.warning("Please specify an operational Transaction reference string.")
                 
-                if any(n['tx_id'] == fallback_meet_tx and n['type'] == 'meetup' for n in st.session_state.admin_notifications if fallback_meet_tx):
+                if tracked_meet_code:
                     st.warning("⏳ Awaiting Administrative Approval for physical routing activation parameters.")
                     if st.button("🔄 Check Authorization Status"):
                         st.rerun()
-                st.stop()
-            else:
-                st.warning("Meetup remittance confirmed processing backend. Awaiting operational administrative assignment authorization.")
                 st.stop()
 
 # --- SIDEBAR CONTENT PANEL ---
@@ -603,10 +933,8 @@ with st.sidebar:
             if not sub_tx_id or not sub_name:
                 st.error("Please ensure your name is written and your transaction code is copied accurately.")
             else:
-                notification = {"tx_id": sub_tx_id, "profile_id": 0, "type": "profile_submission", "name": sub_name, "form_data": {"name": sub_name, "cont": sub_cont, "coun": sub_coun, "bio": sub_bio, "img": sub_img}}
-                if notification not in st.session_state.admin_notifications:
-                    st.session_state.admin_notifications.append(notification)
-                st.info("📨 Form data and reference code submitted to Admin panel queue.")
+                db.submit_manual_transaction(sub_tx_id, 0, "446040-SUB", 100.0, "profile_submission")
+                st.info("📨 Form data and reference code submitted to Admin panel queue database rows.")
 
     st.divider()
 
@@ -628,32 +956,28 @@ with st.sidebar:
         st.divider()
         st.subheader("🔍 Pending Client Verifications")
         
-        if not st.session_state.admin_notifications:
+        # Live persistent polling from database engine
+        pending_list = db.get_pending_verifications()
+        if not pending_list:
             st.write("No incoming verification claims.")
         else:
-            for idx, note in enumerate(st.session_state.admin_notifications):
+            for item in pending_list:
                 st.markdown(f"""
-                📌 **Type:** `{note['type'].upper()}` | **Target Client:** {note['name']}<br>
-                💵 **Code Claimed:** `{note['tx_id']}`
+                📌 **Type:** `{item['type'].upper()}` <br>
+                👤 **Target Client:** {item['profile_name'] if item['profile_name'] else 'New Submission'}<br>
+                💵 **Code Claimed:** `{item['transaction_id']}`<br>
+                💰 **Amount:** KES {item['amount']:.2f}
                 """, unsafe_allow_html=True)
                 
-                if st.button(f"Approve & Unlock Entry {idx}", key=f"approve_note_{idx}"):
-                    if note['type'] == "chat":
-                        st.session_state.verified_chats.add(note['profile_id'])
-                    elif note['type'] == "meetup":
-                        db.approve_meetup(note['profile_id'])
-                        st.session_state.verified_meetups.add(note['profile_id'])
-                    elif note['type'] == "profile_submission":
-                        fd = note['form_data']
-                        f_url = save_uploaded_file(fd['img']) if fd['img'] else "https://via.placeholder.com/150"
-                        db.add_single_profile(fd['name'], fd['cont'], fd['coun'], fd['bio'], 150.0, 2000.0, f_url)
-                    
-                    st.session_state.admin_notifications.pop(idx)
-                    st.success("Authorized successfully!")
+                if st.button(f"Approve & Unlock {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
+                    db.admin_approve_transaction(item['transaction_id'])
+                    if item['type'] == "meetup":
+                        db.approve_meetup(item['profile_id'])
+                    st.success(f"Transaction code {item['transaction_id']} approved successfully!")
                     st.rerun()
                 st.divider()
 
-        # --- RESTORED: ADD NEW CLIENT MANUALLY ---
+        # --- ADD NEW CLIENT MANUALLY ---
         st.subheader("➕ Create Client Account")
         with st.expander("Manually Provision New Client Profile", expanded=False):
             new_name = st.text_input("Name", key="new_name_in")
