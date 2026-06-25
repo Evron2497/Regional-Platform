@@ -46,7 +46,6 @@ def get_profile_amount(profile_id: int, payment_type: str) -> int:
     try:
         cursor.execute("SELECT chat_rate, meetup_rate FROM profiles WHERE id = ?", (profile_id,))
         row = cursor.fetchone()
-        conn.close()
         
         if not row:
             raise HTTPException(status_code=404, detail="Target client profile record entry not found")
@@ -60,6 +59,8 @@ def get_profile_amount(profile_id: int, payment_type: str) -> int:
             
     except sqlite3.Error as e:
         raise HTTPException(status_code=500, detail=f"Internal system database engine exception: {str(e)}")
+    finally:
+        conn.close()
 
 # --- DARAJA API AUTH HELPERS ---
 async def get_mpesa_access_token():
@@ -163,12 +164,14 @@ async def connect_user_profile(payload: ConnectRequest):
         if response.status_code == 200 and res_data.get("ResponseCode") == "0":
             # Record structural tracking item down within database
             conn = get_webhook_db()
-            conn.execute("""
-                INSERT INTO transactions (merchant_request_id, profile_id, account_ref, amount, type, status)
-                VALUES (?, ?, ?, ?, ?, 'pending')
-            """, (res_data.get("MerchantRequestID"), payload.profile_id, account_ref, amount, payload.payment_type))
-            conn.commit()
-            conn.close()
+            try:
+                conn.execute("""
+                    INSERT INTO transactions (merchant_request_id, profile_id, account_ref, amount, type, status)
+                    VALUES (?, ?, ?, ?, ?, 'pending')
+                """, (res_data.get("MerchantRequestID"), payload.profile_id, account_ref, amount, payload.payment_type))
+                conn.commit()
+            finally:
+                conn.close()
 
             return {
                 "status": "initiated",
