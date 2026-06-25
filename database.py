@@ -84,19 +84,9 @@
 #     return row
 
 # def get_available_profiles():
-#     """Fixes IndexError by forcing strict column naming and dictionary structures"""
+#     """Returns profiles available for initial connection"""
 #     conn = get_db()
-#     query = """
-#         SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status 
-#         FROM profiles p 
-#         WHERE NOT EXISTS (
-#             SELECT 1 FROM transactions t 
-#             WHERE t.account_ref = '016536784672' || p.id 
-#             AND t.type = 'chat' 
-#             AND t.status = 'completed'
-#         )
-#     """
-#     rows = conn.execute(query).fetchall()
+#     rows = conn.execute("SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status FROM profiles").fetchall()
 #     conn.close()
     
 #     profiles = []
@@ -144,37 +134,59 @@
 #         return True
 #     return False
 
-# # --- STK PUSH FLOW RECONCILIATION HELPERS ---
+# # --- MANUAL & ADMIN TRANSACTION VERIFICATION HELPERS ---
 
-# def create_pending_transaction(merchant_request_id, profile_id, account_ref, amount, payment_type):
-#     """Logs the checkout initiation right when the prompt fires onto the phone handset"""
+# def submit_manual_transaction(tx_id, profile_id, account_ref, amount, payment_type):
+#     """Inserts a transaction entry directly from the manual code submitted by client"""
 #     conn = get_db()
-#     conn.execute("""
-#         INSERT INTO transactions (merchant_request_id, profile_id, account_ref, amount, type, status)
-#         VALUES (?, ?, ?, ?, ?, 'pending')
-#     """, (merchant_request_id, profile_id, account_ref, amount, payment_type))
-#     conn.commit()
+#     tx_id = tx_id.strip().upper()
+#     try:
+#         conn.execute("""
+#             INSERT INTO transactions (transaction_id, profile_id, account_ref, amount, type, status)
+#             VALUES (?, ?, ?, ?, ?, 'pending')
+#         """, (tx_id, profile_id, account_ref, amount, payment_type))
+#         conn.commit()
+#         return True
+#     except sqlite3.IntegrityError:
+#         return False  # Code was already posted before
+#     finally:
+#         conn.close()
+
+# def get_pending_verifications():
+#     """Fetches all raw client transactions awaiting administrative approval"""
+#     conn = get_db()
+#     rows = conn.execute("""
+#         SELECT t.*, p.name as profile_name 
+#         FROM transactions t
+#         LEFT JOIN profiles p ON t.profile_id = p.id
+#         WHERE t.status = 'pending'
+#     """).fetchall()
 #     conn.close()
+#     return [dict(row) for row in rows]
 
-# def complete_stk_transaction(merchant_request_id, transaction_id):
-#     """Updates status to completed when Safaricom sends a success webhook callback response"""
+# def admin_approve_transaction(tx_id):
+#     """Called when an admin hits approve in their workspace notifications dashboard"""
 #     conn = get_db()
+#     tx_id = tx_id.strip().upper()
 #     conn.execute("""
 #         UPDATE transactions 
-#         SET transaction_id = ?, status = 'completed' 
-#         WHERE merchant_request_id = ?
-#     """, (transaction_id, merchant_request_id))
+#         SET status = 'completed' 
+#         WHERE transaction_id = ?
+#     """, (tx_id,))
 #     conn.commit()
 #     conn.close()
 
 # def claim_and_verify_transaction(tx_id, profile_id, search_type="chat"):
+#     """Checks the database to see if the transaction has been approved/completed by the Admin"""
 #     conn = get_db()
 #     tx_id = tx_id.strip().upper()
     
 #     if search_type == "chat":
-#         expected_ref = f"016536784672{profile_id}"
+#         expected_ref = f"446040-CHA{profile_id}"
+#     elif search_type == "meetup":
+#         expected_ref = f"446040-MEE{profile_id}"
 #     else:
-#         expected_ref = f"MEET016536{profile_id}"
+#         expected_ref = "446040-SUB"
         
 #     row = conn.execute(
 #         "SELECT 1 FROM transactions WHERE transaction_id = ? AND account_ref = ? AND type = ? AND status = 'completed'", 
@@ -183,7 +195,6 @@
     
 #     conn.close()
 #     return row is not None
-
 
 
 import sqlite3
@@ -237,8 +248,8 @@ def init_db():
 def add_single_profile(name, continent, country, bio, chat_rate, meetup_rate, photo_url):
     conn = get_db()
     conn.execute("""
-        INSERT INTO profiles (name, continent, country, bio, chat_rate, meetup_rate, photo_url) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO profiles (name, continent, country, bio, chat_rate, meetup_rate, photo_url, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'browsing')
     """, (name, continent, country, bio, chat_rate, meetup_rate, photo_url))
     conn.commit()
     conn.close()
@@ -272,9 +283,13 @@ def get_single_profile_rates(profile_id: int):
     return row
 
 def get_available_profiles():
-    """Returns profiles available for initial connection"""
+    """Returns ONLY profiles currently available for browsing (hides booked profiles)"""
     conn = get_db()
-    rows = conn.execute("SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status FROM profiles").fetchall()
+    rows = conn.execute("""
+        SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status 
+        FROM profiles 
+        WHERE status = 'browsing'
+    """).fetchall()
     conn.close()
     
     profiles = []
@@ -318,7 +333,8 @@ def check_meetup_status(profile_id):
     conn = get_db()
     row = conn.execute("SELECT status FROM profiles WHERE id = ?", (profile_id,)).fetchone()
     conn.close()
-    if row and row['status'] == 'approved':
+    # Returns True if approved or booked to keep private session flows open
+    if row and row['status'] in ('approved', 'booked'):
         return True
     return False
 
