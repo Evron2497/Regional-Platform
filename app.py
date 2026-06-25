@@ -103,8 +103,8 @@
 # else:
 #     # --- PRIVATE SESSION ---
 #     p = st.session_state.selected
-#     st.title(f"🔒 Session: {p['name']}")
-#     if st.button("⬅️ Back"):
+#     st.title(f"🔒 Private Session Locked to My Chat: {p['name']}")
+#     if st.button("⬅️ Back to Directory"):
 #         del st.session_state.selected
 #         st.rerun()
     
@@ -223,6 +223,11 @@
 #             if not sub_tx_id or not sub_name:
 #                 st.error("Please ensure your name is written and your transaction code is copied accurately.")
 #             else:
+#                 # Cache user inputs into session state memory so admin can fetch parameters upon verification approval hook
+#                 saved_img_path = save_uploaded_file(sub_img) if sub_img else "https://via.placeholder.com/150"
+#                 st.session_state[f"cache_form_{sub_tx_id}"] = {
+#                     "name": sub_name, "continent": sub_cont, "country": sub_coun, "bio": sub_bio, "photo_url": saved_img_path
+#                 }
 #                 db.submit_manual_transaction(sub_tx_id, 0, "446040-SUB", 100.0, "profile_submission")
 #                 st.info("📨 Form data and reference code submitted to Admin panel queue database rows.")
 
@@ -261,8 +266,33 @@
                 
 #                 if st.button(f"Approve & Unlock {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
 #                     db.admin_approve_transaction(item['transaction_id'])
-#                     if item['type'] == "meetup":
-#                         db.approve_meetup(item['profile_id'])
+                    
+#                     # CONDITION 1: Turn client profile status to 'booked' if they are paid for, instantly dropping off marketplace
+#                     if item['type'] == "chat" or item['type'] == "meetup":
+#                         conn = db.get_db()
+#                         conn.execute("UPDATE profiles SET status = 'booked' WHERE id = ?", (item['profile_id'],))
+#                         conn.commit()
+#                         conn.close()
+                        
+#                         if item['type'] == "meetup":
+#                             db.approve_meetup(item['profile_id'])
+                    
+#                     # CONDITION 2: Process profile submission if transaction code matches a cached entry form
+#                     elif item['type'] == "profile_submission":
+#                         form_cache_key = f"cache_form_{item['transaction_id']}"
+#                         if form_cache_key in st.session_state:
+#                             form_data = st.session_state[form_cache_key]
+#                             db.add_single_profile(
+#                                 name=form_data["name"],
+#                                 continent=form_data["continent"],
+#                                 country=form_data["country"],
+#                                 bio=form_data["bio"],
+#                                 chat_rate=150.0,      # Default operational chat rate assignment
+#                                 meetup_rate=1500.0,   # Default operational meetup rate assignment
+#                                 photo_url=form_data["photo_url"]
+#                             )
+#                             del st.session_state[form_cache_key] # Housekeeping cleanup
+                            
 #                     st.success(f"Transaction code {item['transaction_id']} approved successfully!")
 #                     st.rerun()
 #                 st.divider()
@@ -295,7 +325,7 @@
 #         st.subheader("📋 Client Directory")
 #         all_profiles = db.get_profiles()
 #         for p in all_profiles:
-#             with st.expander(f"👤 {p['name']} (ID: {p['id']})"):
+#             with st.expander(f"👤 {p['name']} (ID: {p['id']}) - Status: {p['status']}"):
 #                 n_n = st.text_input("Name", value=p['name'], key=f"en_{p['id']}")
 #                 n_cr = st.number_input("Chat Rate (KES)", value=float(p['chat_rate']), key=f"ecr_{p['id']}")
 #                 n_mr = st.number_input("Meetup Rate (KES)", value=float(p['meetup_rate']), key=f"emr_{p['id']}")
@@ -320,8 +350,6 @@
 #     Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
 #     </div>
 # """, unsafe_allow_html=True)
-
-
 
 
 import streamlit as st
@@ -417,7 +445,7 @@ if "selected" not in st.session_state:
                 chat_rate = profile_dict.get('chat_rate', profile_dict.get('rate', 0.0))
                 meetup_rate = profile_dict.get('meetup_rate', 0.0)
                 
-                st.image(profile_dict['photo_url'], width='stretch')
+                st.image(profile_dict['photo_url'], use_container_width=True)
                 st.write(f"### {profile_dict['name']}")
                 st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
                 st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
@@ -535,7 +563,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
     
-    with st.expander("📝 Fill Submission Form", expanded=False):
+    with st.expander("📝 Fill Submission Form (Client Side Only)", expanded=False):
         sub_name = st.text_input("Display Name", key="sub_name")
         sub_cont = st.selectbox("Continent Location", ["Africa", "America", "Europe", "Asia"], key="sub_cont")
         sub_coun = st.text_input("Country Location", key="sub_coun")
@@ -549,13 +577,13 @@ with st.sidebar:
             if not sub_tx_id or not sub_name:
                 st.error("Please ensure your name is written and your transaction code is copied accurately.")
             else:
-                # Cache user inputs into session state memory so admin can fetch parameters upon verification approval hook
                 saved_img_path = save_uploaded_file(sub_img) if sub_img else "https://via.placeholder.com/150"
                 st.session_state[f"cache_form_{sub_tx_id}"] = {
                     "name": sub_name, "continent": sub_cont, "country": sub_coun, "bio": sub_bio, "photo_url": saved_img_path
                 }
                 db.submit_manual_transaction(sub_tx_id, 0, "446040-SUB", 100.0, "profile_submission")
-                st.info("📨 Form data and reference code submitted to Admin panel queue database rows.")
+                st.info("📨 Form data and reference code submitted to Admin panel queue.")
+                st.rerun()
 
     st.divider()
 
@@ -577,7 +605,6 @@ with st.sidebar:
         st.divider()
         st.subheader("🔍 Pending Client Verifications")
         
-        # Live persistent polling from database engine
         pending_list = db.get_pending_verifications()
         if not pending_list:
             st.write("No incoming verification claims.")
@@ -587,40 +614,49 @@ with st.sidebar:
                 📌 **Type:** `{item['type'].upper()}` <br>
                 👤 **Target Client:** {item['profile_name'] if item['profile_name'] else 'New Submission'}<br>
                 💵 **Code Claimed:** `{item['transaction_id']}`<br>
-                💰 **Amount:** KES {item['amount']:.2f}
+                💰 **Amount Paid:** KES {item['amount']:.2f}
                 """, unsafe_allow_html=True)
                 
-                if st.button(f"Approve & Unlock {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
-                    db.admin_approve_transaction(item['transaction_id'])
-                    
-                    # CONDITION 1: Turn client profile status to 'booked' if they are paid for, instantly dropping off marketplace
-                    if item['type'] == "chat" or item['type'] == "meetup":
-                        conn = db.get_db()
-                        conn.execute("UPDATE profiles SET status = 'booked' WHERE id = ?", (item['profile_id'],))
-                        conn.commit()
-                        conn.close()
+                if item['type'] == "profile_submission":
+                    form_cache_key = f"cache_form_{item['transaction_id']}"
+                    if form_cache_key in st.session_state:
+                        st.info("📋 Assign Profile Pricing parameters below before approving:")
+                        admin_chat_rate = st.number_input(f"Assign Chat Rate (KES) for {st.session_state[form_cache_key]['name']}", min_value=0.0, step=10.0, key=f"adm_ch_{item['transaction_id']}")
+                        admin_meet_rate = st.number_input(f"Assign Meetup Rate (KES) for {st.session_state[form_cache_key]['name']}", min_value=0.0, step=50.0, key=f"adm_mt_{item['transaction_id']}")
                         
-                        if item['type'] == "meetup":
-                            db.approve_meetup(item['profile_id'])
-                    
-                    # CONDITION 2: Process profile submission if transaction code matches a cached entry form
-                    elif item['type'] == "profile_submission":
-                        form_cache_key = f"cache_form_{item['transaction_id']}"
-                        if form_cache_key in st.session_state:
+                        if st.button(f"Approve, Rate & Publish {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
+                            db.admin_approve_transaction(item['transaction_id'])
                             form_data = st.session_state[form_cache_key]
+                            
                             db.add_single_profile(
                                 name=form_data["name"],
                                 continent=form_data["continent"],
                                 country=form_data["country"],
                                 bio=form_data["bio"],
-                                chat_rate=150.0,      # Default operational chat rate assignment
-                                meetup_rate=1500.0,   # Default operational meetup rate assignment
+                                chat_rate=admin_chat_rate,
+                                meetup_rate=admin_meet_rate,
                                 photo_url=form_data["photo_url"]
                             )
-                            del st.session_state[form_cache_key] # Housekeeping cleanup
+                            del st.session_state[form_cache_key]
+                            st.success(f"Profile published immediately with your assigned rates!")
+                            st.rerun()
+                    else:
+                        st.warning("Form cached dataset missing or cleared.")
+                else:
+                    if st.button(f"Approve & Unlock {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
+                        db.admin_approve_transaction(item['transaction_id'])
+                        
+                        if item['type'] in ("chat", "meetup"):
+                            conn = db.get_db()
+                            conn.execute("UPDATE profiles SET status = 'booked' WHERE id = ?", (item['profile_id'],))
+                            conn.commit()
+                            conn.close()
                             
-                    st.success(f"Transaction code {item['transaction_id']} approved successfully!")
-                    st.rerun()
+                            if item['type'] == "meetup":
+                                db.approve_meetup(item['profile_id'])
+                        
+                        st.success(f"Transaction code {item['transaction_id']} approved!")
+                        st.rerun()
                 st.divider()
 
         # --- ADD NEW CLIENT MANUALLY ---
