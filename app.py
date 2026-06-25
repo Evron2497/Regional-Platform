@@ -361,7 +361,6 @@
 
 import streamlit as st
 import database as db
-importlib.reload(db)
 import os
 import uuid
 import base64
