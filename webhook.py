@@ -1,3 +1,4 @@
+
 # import base64
 # import sqlite3
 # from datetime import datetime
@@ -37,8 +38,9 @@
 
 # def get_profile_amount(profile_id: int, payment_type: str) -> int:
 #     """Queries the database for exact operational pricing configured for this specific profile action."""
+#     # Catch registration fees immediately before querying the profile table
 #     if payment_type == "profile_submission":
-#         return 100  # Base flat rate calculation
+#         return 100  # Base flat registration rate calculation
         
 #     conn = get_webhook_db()
 #     cursor = conn.cursor()
@@ -162,7 +164,6 @@
 #         res_data = response.json()
         
 #         if response.status_code == 200 and res_data.get("ResponseCode") == "0":
-#             # Record structural tracking item down within database
 #             conn = get_webhook_db()
 #             try:
 #                 conn.execute("""
@@ -365,3 +366,52 @@ async def connect_user_profile(payload: ConnectRequest):
             }
         else:
             return {"status": "failed", "error": res_data}
+
+# --- STK PUSH CALLBACK HOOK LISTENER ---
+@app.post("/mpesa/callback")
+async def mpesa_callback(request: Request):
+    """
+    Asynchronous hook called by Safaricom Daraja API upon completion.
+    Matches and instantly handles successful payments to change target state maps.
+    """
+    body = await request.json()
+    stk_callback = body.get("Body", {}).get("stkCallback", {})
+    result_code = stk_callback.get("ResultCode")
+    merchant_request_id = stk_callback.get("MerchantRequestID")
+    
+    if result_code == 0:
+        # Payment transaction completed successfully
+        callback_metadata = stk_callback.get("CallbackMetadata", {}).get("Item", [])
+        mpesa_receipt = None
+        for item in callback_metadata:
+            if item.get("Name") == "MpesaReceiptNumber":
+                mpesa_receipt = item.get("Value")
+                break
+                
+        conn = get_webhook_db()
+        try:
+            # Query targeted tracking placeholder row parameter data
+            tx = conn.execute(
+                "SELECT profile_id, type FROM transactions WHERE merchant_request_id = ?", 
+                (merchant_request_id,)
+            ).fetchone()
+            
+            if tx:
+                # Update status parameters and map M-Pesa tracking signature references
+                conn.execute("""
+                    UPDATE transactions 
+                    SET transaction_id = ?, status = 'completed' 
+                    WHERE merchant_request_id = ?
+                """, (mpesa_receipt, merchant_request_id))
+                
+                # Co-exist status modification directly into the profiles matrix to coordinate with locked chats
+                if tx['type'] in ('chat', 'meetup'):
+                    conn.execute("UPDATE profiles SET status = 'booked' WHERE id = ?", (tx['profile_id'],))
+                    if tx['type'] == 'meetup':
+                        conn.execute("UPDATE profiles SET status = 'approved' WHERE id = ?", (tx['profile_id'],))
+                        
+                conn.commit()
+        finally:
+            conn.close()
+            
+    return {"ResultCode": 0, "ResultDesc": "Callback processed successfully"}
