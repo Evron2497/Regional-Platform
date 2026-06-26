@@ -57,7 +57,12 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Hide everything in the top-right toolbar EXCEPT the three-dots main menu */
+    /* Completely removes the Share, Star, Edit, and GitHub icons shown in image_2a7a3c.png */
+    [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
+    
+    /* Fallback catch to ensure any extra non-menu buttons in the toolbar are hidden */
     [data-testid="stAppToolbar"] > :not([data-testid="stMainMenu"]) {
         display: none !important;
     }
