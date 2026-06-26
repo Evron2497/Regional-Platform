@@ -1,3 +1,4 @@
+
 # import sqlite3
 
 # def get_db():
@@ -41,6 +42,15 @@
 #                      amount REAL, 
 #                      type TEXT, 
 #                      status TEXT DEFAULT 'pending')''')
+
+#     # 3. Persistent Messages Table Schema
+#     conn.execute('''CREATE TABLE IF NOT EXISTS messages 
+#                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+#                      profile_id INTEGER, 
+#                      sender TEXT, 
+#                      message TEXT, 
+#                      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+
 #     conn.commit()
 #     conn.close()
 
@@ -162,7 +172,7 @@
 #         conn.close()
 
 # def get_pending_verifications():
-#     """Fetches all raw client transactions awaiting administrative approval"""
+#     """Fetifications all raw client transactions awaiting administrative approval"""
 #     conn = get_db()
 #     rows = conn.execute("""
 #         SELECT t.*, p.name as profile_name 
@@ -204,6 +214,33 @@
     
 #     conn.close()
 #     return row is not None
+
+# # --- PERSISTENT SECURE CHAT OPERATIONS ---
+
+# def save_chat_message(profile_id: int, sender: str, message: str):
+#     """Saves a single message into a profile's custom private room mapping"""
+#     conn = get_db()
+#     conn.execute("""
+#         INSERT INTO messages (profile_id, sender, message) 
+#         VALUES (?, ?, ?)
+#     """, (profile_id, sender, message))
+#     conn.commit()
+#     conn.close()
+
+# def get_chat_history(profile_id: int):
+#     """Fetches complete chronological database log message details for a room"""
+#     conn = get_db()
+#     rows = conn.execute("""
+#         SELECT sender, message, timestamp 
+#         FROM messages 
+#         WHERE profile_id = ? 
+#         ORDER BY timestamp ASC
+#     """, (profile_id,)).fetchall()
+#     conn.close()
+#     return [dict(row) for row in rows]
+
+
+
 import sqlite3
 
 def get_db():
@@ -377,7 +414,7 @@ def submit_manual_transaction(tx_id, profile_id, account_ref, amount, payment_ty
         conn.close()
 
 def get_pending_verifications():
-    """Fetifications all raw client transactions awaiting administrative approval"""
+    """Fetches all raw client transactions awaiting administrative approval"""
     conn = get_db()
     rows = conn.execute("""
         SELECT t.*, p.name as profile_name 
@@ -419,6 +456,22 @@ def claim_and_verify_transaction(tx_id, profile_id, search_type="chat"):
     
     conn.close()
     return row is not None
+
+def get_transaction_session_lookup(tx_id):
+    """
+    Looks up any active or past transaction by key to find the associated target profile.
+    Helps the frontend sidebar seamlessly re-lock sessions on refresh/logout.
+    """
+    conn = get_db()
+    tx_id = tx_id.strip().upper()
+    row = conn.execute("""
+        SELECT profile_id 
+        FROM transactions 
+        WHERE transaction_id = ?
+    """, (tx_id,)).fetchone()
+    conn.close()
+    return row['profile_id'] if row else None
+
 
 # --- PERSISTENT SECURE CHAT OPERATIONS ---
 
