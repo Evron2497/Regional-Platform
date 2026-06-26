@@ -458,27 +458,55 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Hides the entire top header bar */
+    /* 1. REMOVE STREAMLIT BRANDING AND ELEMENTS */
+    #MainMenu {visibility: hidden;} /* Hides the hamburger menu */
+    footer {visibility: hidden;}    /* Hides "Hosted with Streamlit" */
+    header {visibility: hidden;}    /* Hides the top navigation bar */
+    
+    /* 2. PAGE LAYOUT */
     [data-testid="stHeader"] {
-        display: none !important;
+        background-color: rgba(0, 0, 0, 0) !important;
+        height: 0px !important;
+    }
+    [data-testid="stSidebar"] { 
+        background-color: #FFC0CB !important; 
     }
     
-    /* Hides the top colored decoration line/badge shown in image_2921bb.png */
-    [data-testid="stDecoration"] {
-        display: none !important;
+    /* 3. CUSTOM UI COMPONENTS */
+    .navbar { 
+        background: linear-gradient(90deg, #ff69b4, #ff1493); 
+        padding: 15px; 
+        border-radius: 10px; 
+        color: white; 
+    }
+    .pay-box { 
+        background: #f9f9f9; 
+        padding: 20px; 
+        border: 2px dashed #ff1493; 
+        border-radius: 10px; 
+        margin-bottom: 15px; 
+        color: black; 
+    }
+    .rounded-img { 
+        border-radius: 50%; 
+        width: 110px; 
+        height: 110px; 
+        object-fit: cover; 
+    }
+    .welcome-banner { 
+        text-align: center; 
+        background-color: #64F58B; 
+        padding: 15px; 
+        border-radius: 10px; 
+        margin-bottom: 20px; 
     }
     
-    /* Hides the "Made with Streamlit" footer at the bottom */
-    footer {
-        visibility: hidden !important;
+    /* 4. CLEANUP SPACING */
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 0rem;
     }
-    
-    [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
-    .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
-    .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
-    .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
-    .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    </style> 
+    </style>
 """, unsafe_allow_html=True)
 
 # --- TOP NAVBAR ---
