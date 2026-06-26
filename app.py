@@ -750,7 +750,7 @@ else:
             <b>1. Go to M-PESA Menu</b><br>
             <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
             <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
-            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040{p['id']}</span><br>
+            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040   CHAR1{p['id']}</span><br>
             <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
             <hr>
             <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
