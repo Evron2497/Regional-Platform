@@ -458,12 +458,22 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* 1. REMOVE STREAMLIT BRANDING AND ELEMENTS */
-    #MainMenu {visibility: hidden;} /* Hides the hamburger menu */
-    footer {visibility: hidden;}    /* Hides "Hosted with Streamlit" */
-    header {visibility: hidden;}    /* Hides the top navigation bar */
+    /* --- HIDE STREAMLIT BRANDING AND ELEMENTS --- */
+    #MainMenu {visibility: hidden;}            /* Hides the three-dot menu */
+    footer {visibility: hidden;}               /* Hides the "Made with Streamlit" text */
+    header {visibility: hidden;}               /* Hides the top header */
     
-    /* 2. PAGE LAYOUT */
+    /* Hides the "Deploy" button in the corner */
+    [data-testid="stAppDeployButton"] {
+        display: none !important;
+    }
+    
+    /* Optional: If the button still persists, use this more aggressive selector */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+
+    /* --- YOUR EXISTING STYLES --- */
     [data-testid="stHeader"] {
         background-color: rgba(0, 0, 0, 0) !important;
         height: 0px !important;
@@ -471,41 +481,9 @@ st.markdown("""
     [data-testid="stSidebar"] { 
         background-color: #FFC0CB !important; 
     }
-    
-    /* 3. CUSTOM UI COMPONENTS */
-    .navbar { 
-        background: linear-gradient(90deg, #ff69b4, #ff1493); 
-        padding: 15px; 
-        border-radius: 10px; 
-        color: white; 
-    }
-    .pay-box { 
-        background: #f9f9f9; 
-        padding: 20px; 
-        border: 2px dashed #ff1493; 
-        border-radius: 10px; 
-        margin-bottom: 15px; 
-        color: black; 
-    }
-    .rounded-img { 
-        border-radius: 50%; 
-        width: 110px; 
-        height: 110px; 
-        object-fit: cover; 
-    }
-    .welcome-banner { 
-        text-align: center; 
-        background-color: #64F58B; 
-        padding: 15px; 
-        border-radius: 10px; 
-        margin-bottom: 20px; 
-    }
-    
-    /* 4. CLEANUP SPACING */
-    .block-container {
-        padding-top: 1rem;
-        padding-bottom: 0rem;
-    }
+    .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
+    .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
+    .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
     </style>
 """, unsafe_allow_html=True)
 
