@@ -536,9 +536,8 @@ if "backend_started" not in st.session_state:
     except Exception as e:
         st.error(f"Internal wrapper failed to spin up background API gateway: {e}")
 
-# --- PAGE CONFIG (Enforce Permanent Sidebar) ---
-# Setting initial_sidebar_state to "disabled" locks it open and removes the toggle button
-st.set_page_config(layout="wide", page_title="TECH-STAR", initial_sidebar_state="disabled")
+# --- PAGE CONFIG (Enforce Sidebar Expanded) ---
+st.set_page_config(layout="wide", page_title="TECH-STAR", initial_sidebar_state="expanded")
 db.init_db()
 
 FASTAPI_BACKEND_URL = "http://127.0.0.1:8000" 
@@ -559,9 +558,25 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Hides the entire top header bar shown in image_28a8be.png */
-    [data-testid="stHeader"] {
+    /* Force the sidebar to remain open and hide collapse triggers */
+    [data-testid="stSidebarCollapsedControl"], 
+    button[title="Collapse sidebar"] {
         display: none !important;
+    }
+    
+    /* Hide everything in the top-right toolbar EXCEPT the three-dots main menu */
+    [data-testid="stAppToolbar"] > :not([data-testid="stMainMenu"]) {
+        display: none !important;
+    }
+    
+    /* Hides the top right colored decoration badge shown in image_2921bb.png */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    
+    /* Hides the default Streamlit footer branding */
+    footer {
+        visibility: hidden !important;
     }
     
     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
@@ -569,8 +584,29 @@ st.markdown("""
     .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+
+    /* --- FLOATING LEFT BOTTOM INDICATOR --- */
+    .mobile-sidebar-hint {
+        position: fixed;
+        bottom: 20px;
+        left: 20px; 
+        background: linear-gradient(90deg, #ff1493, #ff69b4);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 30px;
+        font-weight: bold;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+        z-index: 999999;
+        font-size: 14px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
     </style> 
 """, unsafe_allow_html=True)
+
 # Floating baseline display status info
 st.markdown("""
     <div class="mobile-sidebar-hint">
@@ -867,7 +903,7 @@ else:
             <b>1. Go to M-PESA Menu</b><br>
             <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
             <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
-            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040      CHAR{p['id']}</span><br>
+            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040     CHAR{p['id']}</span><br>
             <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
             <hr>
             <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
