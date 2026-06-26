@@ -458,9 +458,19 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Hides the entire top header bar shown in image_28a8be.png */
+    /* Hides the entire top header bar */
     [data-testid="stHeader"] {
         display: none !important;
+    }
+    
+    /* Hides the top colored decoration line/badge shown in image_2921bb.png */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    
+    /* Hides the "Made with Streamlit" footer at the bottom */
+    footer {
+        visibility: hidden !important;
     }
     
     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
