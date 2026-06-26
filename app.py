@@ -56,15 +56,12 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Explicitly hide only the list items containing the Fork or GitHub links shown in image_2ae3d6.png */
-    div[data-testid="stAppToolbar"] ul li:has(a[href*="github"]),
-    div[data-testid="stAppToolbar"] ul li:has(a[href*="fork"]),
-    div[data-testid="stAppToolbar"] a[href*="github.com"],
-    [data-testid="stHeaderActionElements"] {
+    /* Hide everything in the top-right toolbar EXCEPT the three-dots main menu */
+    [data-testid="stAppToolbar"] > :not([data-testid="stMainMenu"]) {
         display: none !important;
     }
     
-    /* Hides the top right colored decoration badge / crown layout */
+    /* Hides the top right colored decoration badge shown in image_2921bb.png */
     [data-testid="stDecoration"] {
         display: none !important;
     }
@@ -80,49 +77,48 @@ st.markdown("""
     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
 
-    /* --- FLOATING BOTTOM SWIPE/TAP BAR VIA image_2b5494.png LOGIC --- */
+    /* --- FLOATING LEFT BOTTOM SWIPE INDICATOR (image_2b5494.png) --- */
     .mobile-sidebar-hint {
         position: fixed;
-        bottom: 15px;
-        left: 50%;
-        transform: translateX(-50%);
+        bottom: 20px;
+        left: 20px; /* Locked to the left bottom side */
         background: linear-gradient(90deg, #ff1493, #ff69b4);
         color: white;
-        padding: 12px 28px;
+        padding: 12px 20px;
         border-radius: 30px;
         font-weight: bold;
-        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
         z-index: 999999;
         cursor: pointer;
-        font-size: 15px;
+        font-size: 14px;
         text-align: center;
-        animation: pulseHint 2s infinite;
-        white-space: nowrap;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
+        animation: pulseLeftHint 2s infinite;
+        white-space: nowrap;
     }
 
     .chevron-icon {
         font-family: monospace;
         font-weight: 900;
         letter-spacing: -2px;
-        font-size: 18px;
-        opacity: 0.85;
+        font-size: 16px;
+        opacity: 0.9;
     }
 
-    @keyframes pulseHint {
-        0% { transform: translateX(-50%) scale(1); }
-        50% { transform: translateX(-50%) scale(1.04); }
-        100% { transform: translateX(-50%) scale(1); }
+    @keyframes pulseLeftHint {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.04); }
+        100% { transform: scale(1); }
     }
     </style> 
 """, unsafe_allow_html=True)
 
-# Inject interactive floating action indicator referencing the format from image_2b5494.png
+# Floating action trigger at the left bottom layout edge
 st.markdown("""
     <div class="mobile-sidebar-hint" onclick="document.querySelector('[data-testid=\'stSidebarCollapsedControl\'] button')?.click();">
-        <span class="chevron-icon">&gt;&gt;</span> Swipe / Tap to Open Options Key 🔑
+        <span class="chevron-icon">&gt;&gt;</span> Swipe / Open Options 🔑
     </div>
 """, unsafe_allow_html=True)
 
