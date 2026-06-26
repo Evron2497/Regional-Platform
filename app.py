@@ -58,9 +58,19 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Hides the entire top header bar shown in image_28a8be.png */
-    [data-testid="stHeader"] {
+    /* Hides ONLY the toolbar buttons on the right hand side (Share, GitHub, Menu) */
+    [data-testid="stAppToolbar"] {
         display: none !important;
+    }
+    
+    /* Hides the top right colored decoration badge shown in image_2921bb.png */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    
+    /* Hides the default Streamlit footer branding */
+    footer {
+        visibility: hidden !important;
     }
     
     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
