@@ -146,59 +146,72 @@
 #                 st.rerun()
 #         st.stop()
 
-#     # 2. CHAT & MEETUP FLOW
+#     # 2. CHAT & MEETUP FLOW (PERSISTENT SECURED DATABASE ROOM)
 #     is_meetup_approved = db.check_meetup_status(p['id'])
     
 #     if is_meetup_approved:
 #         st.success("✅ Meetup Approved! Target logistical coordinates sent.")
-#     else:
-#         u_k = f"u_{p['id']}"
-#         st.session_state[u_k] = st.session_state.get(u_k, 0)
+    
+#     st.subheader(f"💬 Live Secured Chat Room: Unlocked Session with {p['name']}")
+    
+#     # Render the persistent database timeline container
+#     chat_container = st.container(height=400)
+#     with chat_container:
+#         history = db.get_chat_history(p['id'])
+#         if not history:
+#             st.caption("✨ Line established securely. Start typing your message below...")
+#         else:
+#             for msg in history:
+#                 # Set layout bubble design role types dynamically 
+#                 role = "user" if msg['sender'] == "Client" else "assistant"
+#                 with st.chat_message(role):
+#                     st.markdown(f"**{msg['sender']}:** {msg['message']}")
+    
+#     # Standard Client Input Area
+#     client_msg = st.chat_input("Type your message here...", key=f"chat_input_client_{p['id']}")
+#     if client_msg:
+#         db.save_chat_message(p['id'], "Client", client_msg)
+#         st.rerun()
         
-#         msg = st.chat_input("Secure message...")
-#         if msg:
-#             st.session_state[u_k] += 1
-#             st.chat_message("user").write(msg)
-#             st.chat_message("assistant").write("Secure response.")
-#             st.rerun()
+#     # --- MEETUP BARRIER ---
+#     total_messages = len(db.get_chat_history(p['id']))
+#     st.caption(f"Progress Metric: {total_messages}/10 interactions recorded.")
+    
+#     if total_messages >= 10:
+#         meet_input_tracker_key = f"entered_tx_meet_{p['id']}"
+#         tracked_meet_code = st.session_state.get(meet_input_tracker_key, "").strip().upper()
         
-#         st.caption(f"Progress: {st.session_state[u_k]}/10")
+#         is_meet_unlocked = db.claim_and_verify_transaction(tracked_meet_code, p['id'], "meetup") if tracked_meet_code else False
         
-#         if st.session_state[u_k] >= 10:
-#             meet_input_tracker_key = f"entered_tx_meet_{p['id']}"
-#             tracked_meet_code = st.session_state.get(meet_input_tracker_key, "").strip().upper()
+#         if not is_meet_unlocked:
+#             st.markdown(f"""
+#             <div class="pay-box">
+#                 <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
+#                 <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
+#                 <hr>
+#                 <b>1. Paybill Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span><br>
+#                 <b>2. Account Reference Target:</b> <span style="color:#ff1493; font-weight:bold;">446040-MEE{p['id']}</span><br>
+#                 <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p['meetup_rate']:.2f}</span><br>
+#                 <hr>
+#                 <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
+#             </div>
+#             """, unsafe_allow_html=True)
             
-#             is_meet_unlocked = db.claim_and_verify_transaction(tracked_meet_code, p['id'], "meetup") if tracked_meet_code else False
+#             fallback_meet_tx = st.text_input("Enter Meetup Payment Transaction ID to unlock:", key=f"tx_meet_{p['id']}").strip().upper()
             
-#             if not is_meet_unlocked:
-#                 st.markdown(f"""
-#                 <div class="pay-box">
-#                     <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
-#                     <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
-#                     <hr>
-#                     <b>1. Paybill Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span><br>
-#                     <b>2. Account Reference Target:</b> <span style="color:#ff1493; font-weight:bold;">446040-MEE{p['id']}</span><br>
-#                     <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p['meetup_rate']:.2f}</span><br>
-#                     <hr>
-#                     <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
-#                 </div>
-#                 """, unsafe_allow_html=True)
-                
-#                 fallback_meet_tx = st.text_input("Enter Meetup Payment Transaction ID to unlock:", key=f"tx_meet_{p['id']}").strip().upper()
-                
-#                 if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
-#                     if fallback_meet_tx:
-#                         db.submit_manual_transaction(fallback_meet_tx, p['id'], f"446040-MEE{p['id']}", p['meetup_rate'], "meetup")
-#                         st.session_state[meet_input_tracker_key] = fallback_meet_tx
-#                         st.rerun()
-#                     else:
-#                         st.warning("Please specify an operational Transaction reference string.")
-                
-#                 if tracked_meet_code:
-#                     st.warning("⏳ Awaiting Administrative Approval for physical routing activation parameters.")
-#                     if st.button("🔄 Check Authorization Status"):
-#                         st.rerun()
-#                 st.stop()
+#             if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
+#                 if fallback_meet_tx:
+#                     db.submit_manual_transaction(fallback_meet_tx, p['id'], f"446040-MEE{p['id']}", p['meetup_rate'], "meetup")
+#                     st.session_state[meet_input_tracker_key] = fallback_meet_tx
+#                     st.rerun()
+#                 else:
+#                     st.warning("Please specify an operational Transaction reference string.")
+            
+#             if tracked_meet_code:
+#                 st.warning("⏳ Awaiting Administrative Approval for physical routing activation parameters.")
+#                 if st.button("🔄 Check Authorization Status"):
+#                     st.rerun()
+#             st.stop()
 
 # # --- SIDEBAR CONTENT PANEL ---
 # with st.sidebar:
@@ -281,7 +294,8 @@
 #                                 bio=form_data["bio"],
 #                                 chat_rate=admin_chat_rate,
 #                                 meetup_rate=admin_meet_rate,
-#                                 photo_url=form_data["photo_url"]
+#                                 photo_url=form_data["photo_url"],
+#                                 status='browsing'
 #                             )
 #                             del st.session_state[form_cache_key]
 #                             st.success(f"Profile published immediately with your assigned rates!")
@@ -325,29 +339,53 @@
 #                     st.error("A profile must have an assigned name label.")
 #                 else:
 #                     photo_url = save_uploaded_file(new_up) if new_up else "https://via.placeholder.com/150"
-#                     db.add_single_profile(new_name, new_cont, new_coun, new_bio, new_chat_rate, new_meet_rate, photo_url)
+#                     db.add_single_profile(new_name, new_cont, new_coun, new_bio, new_chat_rate, new_meet_rate, photo_url, status='browsing')
 #                     st.success(f"Added {new_name} successfully!")
 #                     st.rerun()
 
 #         st.divider()
 #         st.subheader("📋 Client Directory")
 #         all_profiles = db.get_profiles()
-#         for p in all_profiles:
-#             with st.expander(f"👤 {p['name']} (ID: {p['id']}) - Status: {p['status']}"):
-#                 n_n = st.text_input("Name", value=p['name'], key=f"en_{p['id']}")
-#                 n_cr = st.number_input("Chat Rate (KES)", value=float(p['chat_rate']), key=f"ecr_{p['id']}")
-#                 n_mr = st.number_input("Meetup Rate (KES)", value=float(p['meetup_rate']), key=f"emr_{p['id']}")
-#                 up = st.file_uploader(f"Upload image for {p['name']}", type=['png', 'jpg'], key=f"up_{p['id']}")
+#         for directory_p in all_profiles:
+#             with st.expander(f"👤 {directory_p['name']} (ID: {directory_p['id']}) - Status: {directory_p['status']}"):
+#                 n_n = st.text_input("Name", value=directory_p['name'], key=f"en_{directory_p['id']}")
+#                 n_cr = st.number_input("Chat Rate (KES)", value=float(directory_p['chat_rate']), key=f"ecr_{directory_p['id']}")
+#                 n_mr = st.number_input("Meetup Rate (KES)", value=float(directory_p['meetup_rate']), key=f"emr_{directory_p['id']}")
+#                 up = st.file_uploader(f"Upload image for {directory_p['name']}", type=['png', 'jpg'], key=f"up_{directory_p['id']}")
                 
-#                 if st.button(f"Update {p['name']}", key=f"upd_{p['id']}"):
-#                     f_u = save_uploaded_file(up) if up else p['photo_url']
-#                     db.update_profile(p['id'], n_n, p['continent'], p['country'], p['bio'], n_cr, n_mr, f_u)
-#                     st.success(f"Updated {p['name']}!")
+#                 if st.button(f"Update {directory_p['name']}", key=f"upd_{directory_p['id']}"):
+#                     f_u = save_uploaded_file(up) if up else directory_p['photo_url']
+#                     db.update_profile(directory_p['id'], n_n, directory_p['continent'], directory_p['country'], directory_p['bio'], n_cr, n_mr, f_u)
+#                     st.success(f"Updated {directory_p['name']}!")
 #                     st.rerun()
                 
-#                 if st.button(f"Delete {p['name']}", key=f"del_{p['id']}"):
-#                     db.delete_profile(p['id'])
-#                     st.success(f"Deleted {p['name']}!")
+#                 if st.button(f"Delete {directory_p['name']}", key=f"del_{directory_p['id']}"):
+#                     db.delete_profile(directory_p['id'])
+#                     st.success(f"Deleted {directory_p['name']}!")
+#                     st.rerun()
+
+#         # --- ADMIN LIVE INTERVENTION OPERATOR CHAT MATRIX ---
+#         st.divider()
+#         st.subheader("🗣️ Admin Live Chat Panel")
+        
+#         chat_active_profiles = db.get_profiles()
+#         room_choices = {cp['id']: cp['name'] for cp in chat_active_profiles}
+        
+#         if room_choices:
+#             chosen_room_id = st.selectbox("Monitor Chat Room:", options=list(room_choices.keys()), format_func=lambda x: room_choices[x], key="admin_room_picker")
+            
+#             st.caption(f"Timeline Log: {room_choices[chosen_room_id]}")
+#             with st.container(height=180):
+#                 room_history = db.get_chat_history(chosen_room_id)
+#                 for r_msg in room_history:
+#                     st.markdown(f"**{r_msg['sender']}:** {r_msg['message']}")
+            
+#             admin_identity = st.radio("Send Message As:", [room_choices[chosen_room_id], "System Admin"], horizontal=True, key="admin_identity_choice")
+#             admin_response_msg = st.text_input("Type response message:", key="admin_text_input")
+            
+#             if st.button("✉️ Dispatch Message", key="admin_dispatch_btn"):
+#                 if admin_response_msg.strip():
+#                     db.save_chat_message(chosen_room_id, admin_identity, admin_response_msg.strip())
 #                     st.rerun()
 
 # # --- FOOTER ---
@@ -358,6 +396,8 @@
 #     Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
 #     </div>
 # """, unsafe_allow_html=True)
+
+
 
 import streamlit as st
 import database as db
@@ -436,146 +476,59 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- APP LOGIC ---
-if "selected" not in st.session_state:
-    # --- MARKETPLACE ---
-    profiles = db.get_available_profiles()
-    
-    if not profiles:
-        st.info("✨ All profiles are currently in active sessions. Please check back shortly!")
-    else:
-        cols = st.columns(3) 
-        for idx, p in enumerate(profiles):
-            with cols[idx % 3]:
-                profile_dict = dict(p) if not isinstance(p, dict) else p
-                
-                chat_rate = profile_dict.get('chat_rate', profile_dict.get('rate', 0.0))
-                meetup_rate = profile_dict.get('meetup_rate', 0.0)
-                
-                st.image(profile_dict['photo_url'], use_container_width=True)
-                st.write(f"### {profile_dict['name']}")
-                st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
-                st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
-                st.write(f"🤝 **Meetup Rate:** KES {meetup_rate:.2f}")
-                
-                if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
-                    st.session_state.selected = profile_dict
-                    st.rerun()
-else:
-    # --- PRIVATE SESSION ---
-    p = st.session_state.selected
-    st.title(f"🔒 Private Session Locked to My Chat: {p['name']}")
-    if st.button("⬅️ Back to Directory"):
-        del st.session_state.selected
-        st.rerun()
-    
-    # 1. GATEKEEPER: CHAT TRANSACTION VALIDATION
-    chat_input_tracker_key = f"entered_tx_chat_{p['id']}"
-    tracked_chat_code = st.session_state.get(chat_input_tracker_key, "").strip().upper()
-    
-    is_chat_unlocked = db.claim_and_verify_transaction(tracked_chat_code, p['id'], "chat") if tracked_chat_code else False
-
-    if not is_chat_unlocked:
-        st.markdown(f"""
-        <div class="pay-box">
-            <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
-            <p>To unlock your direct secure chat line, make a manual payment using the billing details below:</p>
-            <hr>
-            <b>1. Go to M-PESA Menu</b><br>
-            <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
-            <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
-            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040-CHA{p['id']}</span><br>
-            <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
-            <hr>
-            <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        fallback_tx_id = st.text_input("Verification Step: Paste M-Pesa Transaction ID (e.g., SFT712XYZ0):", key=f"tx_chat_{p['id']}").strip().upper()
-        
-        if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
-            if fallback_tx_id:
-                db.submit_manual_transaction(fallback_tx_id, p['id'], f"446040-CHA{p['id']}", p['chat_rate'], "chat")
-                st.session_state[chat_input_tracker_key] = fallback_tx_id
-                st.rerun()
-            else:
-                st.warning("Please paste a valid transaction ID before submitting.")
-        
-        if tracked_chat_code:
-            st.warning("⏳ Access Status: Awaiting Admin Approval. Click refresh below to update your line link status.")
-            if st.button("🔄 Refresh Status Window"):
-                st.rerun()
-        st.stop()
-
-    # 2. CHAT & MEETUP FLOW (PERSISTENT SECURED DATABASE ROOM)
-    is_meetup_approved = db.check_meetup_status(p['id'])
-    
-    if is_meetup_approved:
-        st.success("✅ Meetup Approved! Target logistical coordinates sent.")
-    
-    st.subheader(f"💬 Live Secured Chat Room: Unlocked Session with {p['name']}")
-    
-    # Render the persistent database timeline container
-    chat_container = st.container(height=400)
-    with chat_container:
-        history = db.get_chat_history(p['id'])
-        if not history:
-            st.caption("✨ Line established securely. Start typing your message below...")
-        else:
-            for msg in history:
-                # Set layout bubble design role types dynamically 
-                role = "user" if msg['sender'] == "Client" else "assistant"
-                with st.chat_message(role):
-                    st.markdown(f"**{msg['sender']}:** {msg['message']}")
-    
-    # Standard Client Input Area
-    client_msg = st.chat_input("Type your message here...", key=f"chat_input_client_{p['id']}")
-    if client_msg:
-        db.save_chat_message(p['id'], "Client", client_msg)
-        st.rerun()
-        
-    # --- MEETUP BARRIER ---
-    total_messages = len(db.get_chat_history(p['id']))
-    st.caption(f"Progress Metric: {total_messages}/10 interactions recorded.")
-    
-    if total_messages >= 10:
-        meet_input_tracker_key = f"entered_tx_meet_{p['id']}"
-        tracked_meet_code = st.session_state.get(meet_input_tracker_key, "").strip().upper()
-        
-        is_meet_unlocked = db.claim_and_verify_transaction(tracked_meet_code, p['id'], "meetup") if tracked_meet_code else False
-        
-        if not is_meet_unlocked:
-            st.markdown(f"""
-            <div class="pay-box">
-                <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
-                <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
-                <hr>
-                <b>1. Paybill Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span><br>
-                <b>2. Account Reference Target:</b> <span style="color:#ff1493; font-weight:bold;">446040-MEE{p['id']}</span><br>
-                <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p['meetup_rate']:.2f}</span><br>
-                <hr>
-                <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            fallback_meet_tx = st.text_input("Enter Meetup Payment Transaction ID to unlock:", key=f"tx_meet_{p['id']}").strip().upper()
-            
-            if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
-                if fallback_meet_tx:
-                    db.submit_manual_transaction(fallback_meet_tx, p['id'], f"446040-MEE{p['id']}", p['meetup_rate'], "meetup")
-                    st.session_state[meet_input_tracker_key] = fallback_meet_tx
-                    st.rerun()
-                else:
-                    st.warning("Please specify an operational Transaction reference string.")
-            
-            if tracked_meet_code:
-                st.warning("⏳ Awaiting Administrative Approval for physical routing activation parameters.")
-                if st.button("🔄 Check Authorization Status"):
-                    st.rerun()
-            st.stop()
-
 # --- SIDEBAR CONTENT PANEL ---
 with st.sidebar:
+    # --- NEW FEATURE: RESUME CLIENT SESSION VIA TRANSACTION ID ---
+    st.header("🔑 Resume Session")
+    st.markdown("If you already paid, enter your Transaction ID to quickly resume your secure chat line:")
+    
+    recovery_tx_id = st.text_input("Enter M-Pesa Transaction ID:", key="sidebar_recovery_input").strip().upper()
+    if st.button("🚀 Restore My Chat Session", key="sidebar_recovery_btn"):
+        if recovery_tx_id:
+            # Look up transaction claims inside db to discover associated target profiles
+            pending_list = db.get_pending_verifications()
+            all_profiles = db.get_profiles()
+            
+            # Find matching metadata across transactions database
+            found_profile_id = None
+            conn = db.get_db()
+            cursor = conn.cursor()
+            try:
+                # Query the manual transactions repository for a match
+                cursor.execute("SELECT profile_id FROM manual_transactions WHERE transaction_id = ?", (recovery_tx_id,))
+                row = cursor.fetchone()
+                if row:
+                    found_profile_id = row[0]
+            except Exception:
+                # Fallback sweep over the profile records lookup if transaction mapping table differs
+                pass
+            finally:
+                conn.close()
+
+            # If not explicitly matched via lookup query, check fallback structure from active profile arrays
+            if not found_profile_id:
+                for verification in pending_list:
+                    if verification['transaction_id'] == recovery_tx_id:
+                        found_profile_id = verification.get('profile_id')
+                        break
+
+            if found_profile_id:
+                matched_profile = next((dict(prof) for prof in all_profiles if prof['id'] == found_profile_id), None)
+                if matched_profile:
+                    st.session_state.selected = matched_profile
+                    # Seed verification tracking states to bypass gatekeeper roadblock
+                    st.session_state[f"entered_tx_chat_{found_profile_id}"] = recovery_tx_id
+                    st.success(f"Session Restored successfully for room: {matched_profile['name']}!")
+                    st.rerun()
+                else:
+                    st.error("The profile associated with this verification code is no longer active.")
+            else:
+                st.error("Transaction Code reference not found or unlinked. Verify entries.")
+        else:
+            st.warning("Please specify an operational Transaction string.")
+
+    st.divider()
+
     st.header("✨ Add Your Profile Display")
     st.markdown("""
     <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px solid #ff1493; color: black; font-size:13px; margin-bottom:10px;">
@@ -748,6 +701,143 @@ with st.sidebar:
                 if admin_response_msg.strip():
                     db.save_chat_message(chosen_room_id, admin_identity, admin_response_msg.strip())
                     st.rerun()
+
+# --- MAIN APP LOGIC ---
+if "selected" not in st.session_state:
+    # --- MARKETPLACE ---
+    profiles = db.get_available_profiles()
+    
+    if not profiles:
+        st.info("✨ All profiles are currently in active sessions. Please check back shortly!")
+    else:
+        cols = st.columns(3) 
+        for idx, p in enumerate(profiles):
+            with cols[idx % 3]:
+                profile_dict = dict(p) if not isinstance(p, dict) else p
+                
+                chat_rate = profile_dict.get('chat_rate', profile_dict.get('rate', 0.0))
+                meetup_rate = profile_dict.get('meetup_rate', 0.0)
+                
+                st.image(profile_dict['photo_url'], use_container_width=True)
+                st.write(f"### {profile_dict['name']}")
+                st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
+                st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
+                st.write(f"🤝 **Meetup Rate:** KES {meetup_rate:.2f}")
+                
+                if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
+                    st.session_state.selected = profile_dict
+                    st.rerun()
+else:
+    # --- PRIVATE SESSION ---
+    p = st.session_state.selected
+    st.title(f"🔒 Private Session Locked to My Chat: {p['name']}")
+    if st.button("⬅️ Back to Directory"):
+        del st.session_state.selected
+        st.rerun()
+    
+    # 1. GATEKEEPER: CHAT TRANSACTION VALIDATION
+    chat_input_tracker_key = f"entered_tx_chat_{p['id']}"
+    tracked_chat_code = st.session_state.get(chat_input_tracker_key, "").strip().upper()
+    
+    is_chat_unlocked = db.claim_and_verify_transaction(tracked_chat_code, p['id'], "chat") if tracked_chat_code else False
+
+    if not is_chat_unlocked:
+        st.markdown(f"""
+        <div class="pay-box">
+            <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
+            <p>To unlock your direct secure chat line, make a manual payment using the billing details below:</p>
+            <hr>
+            <b>1. Go to M-PESA Menu</b><br>
+            <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
+            <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
+            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040-CHA{p['id']}</span><br>
+            <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
+            <hr>
+            <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        fallback_tx_id = st.text_input("Verification Step: Paste M-Pesa Transaction ID (e.g., SFT712XYZ0):", key=f"tx_chat_{p['id']}").strip().upper()
+        
+        if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
+            if fallback_tx_id:
+                db.submit_manual_transaction(fallback_tx_id, p['id'], f"446040-CHA{p['id']}", p['chat_rate'], "chat")
+                st.session_state[chat_input_tracker_key] = fallback_tx_id
+                st.rerun()
+            else:
+                st.warning("Please paste a valid transaction ID before submitting.")
+        
+        if tracked_chat_code:
+            st.warning("⏳ Access Status: Awaiting Admin Approval. Click refresh below to update your line link status.")
+            if st.button("🔄 Refresh Status Window"):
+                st.rerun()
+        st.stop()
+
+    # 2. CHAT & MEETUP FLOW (PERSISTENT SECURED DATABASE ROOM)
+    is_meetup_approved = db.check_meetup_status(p['id'])
+    
+    if is_meetup_approved:
+        st.success("✅ Meetup Approved! Target logistical coordinates sent.")
+    
+    st.subheader(f"💬 Live Secured Chat Room: Unlocked Session with {p['name']}")
+    
+    # Render the persistent database timeline container
+    chat_container = st.container(height=400)
+    with chat_container:
+        history = db.get_chat_history(p['id'])
+        if not history:
+            st.caption("✨ Line established securely. Start typing your message below...")
+        else:
+            for msg in history:
+                role = "user" if msg['sender'] == "Client" else "assistant"
+                with st.chat_message(role):
+                    st.markdown(f"**{msg['sender']}:** {msg['message']}")
+    
+    # Standard Client Input Area
+    client_msg = st.chat_input("Type your message here...", key=f"chat_input_client_{p['id']}")
+    if client_msg:
+        db.save_chat_message(p['id'], "Client", client_msg)
+        st.rerun()
+        
+    # --- MEETUP BARRIER ---
+    total_messages = len(db.get_chat_history(p['id']))
+    st.caption(f"Progress Metric: {total_messages}/10 interactions recorded.")
+    
+    if total_messages >= 10:
+        meet_input_tracker_key = f"entered_tx_meet_{p['id']}"
+        tracked_meet_code = st.session_state.get(meet_input_tracker_key, "").strip().upper()
+        
+        is_meet_unlocked = db.claim_and_verify_transaction(tracked_meet_code, p['id'], "meetup") if tracked_meet_code else False
+        
+        if not is_meet_unlocked:
+            st.markdown(f"""
+            <div class="pay-box">
+                <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
+                <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
+                <hr>
+                <b>1. Paybill Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span><br>
+                <b>2. Account Reference Target:</b> <span style="color:#ff1493; font-weight:bold;">446040-MEE{p['id']}</span><br>
+                <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p['meetup_rate']:.2f}</span><br>
+                <hr>
+                <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            fallback_meet_tx = st.text_input("Enter Meetup Payment Transaction ID to unlock:", key=f"tx_meet_{p['id']}").strip().upper()
+            
+            if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
+                if fallback_meet_tx:
+                    db.submit_manual_transaction(fallback_meet_tx, p['id'], f"446040-MEE{p['id']}", p['meetup_rate'], "meetup")
+                    st.session_state[meet_input_tracker_key] = fallback_meet_tx
+                    st.rerun()
+                else:
+                    st.warning("Please specify an operational Transaction reference string.")
+            
+            if tracked_meet_code:
+                st.warning("⏳ Awaiting Administrative Approval for physical routing activation parameters.")
+                if st.button("🔄 Check Authorization Status"):
+                    st.rerun()
+            st.stop()
 
 # --- FOOTER ---
 st.markdown("---")
