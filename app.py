@@ -514,7 +514,6 @@
 #     Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
 #     </div>
 # """, unsafe_allow_html=True)
-
 import streamlit as st
 import database as db
 import os
@@ -537,8 +536,9 @@ if "backend_started" not in st.session_state:
     except Exception as e:
         st.error(f"Internal wrapper failed to spin up background API gateway: {e}")
 
-# --- PAGE CONFIG (Enforce Sidebar Expanded) ---
-st.set_page_config(layout="wide", page_title="TECH-STAR", initial_sidebar_state="expanded")
+# --- PAGE CONFIG (Enforce Permanent Sidebar) ---
+# Setting initial_sidebar_state to "disabled" locks it open and removes the toggle button
+st.set_page_config(layout="wide", page_title="TECH-STAR", initial_sidebar_state="disabled")
 db.init_db()
 
 FASTAPI_BACKEND_URL = "http://127.0.0.1:8000" 
@@ -867,7 +867,7 @@ else:
             <b>1. Go to M-PESA Menu</b><br>
             <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
             <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
-            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040     CHAR{p['id']}</span><br>
+            <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040      CHAR{p['id']}</span><br>
             <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
             <hr>
             <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
