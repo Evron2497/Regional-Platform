@@ -745,7 +745,7 @@ else:
         st.markdown(f"""
         <div class="pay-box">
             <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
-            <p>To unlock your direct secure chat line, make a manual payment using the billing details below:</p>
+            <p>To unlock your direct secure chat line, make a manual payment using the billing details below as Business No-542542, Account No-446040 . Don't include CHAR:</p>
             <hr>
             <b>1. Go to M-PESA Menu</b><br>
             <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
