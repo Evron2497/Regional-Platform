@@ -80,7 +80,7 @@ st.markdown("""
     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
 
-    /* --- NEW FEATURE: FLOATING BOTTOM SWIPE/TAP HINT BAR --- */
+    /* --- FLOATING BOTTOM SWIPE/TAP BAR VIA image_2b5494.png LOGIC --- */
     .mobile-sidebar-hint {
         position: fixed;
         bottom: 15px;
@@ -88,30 +88,41 @@ st.markdown("""
         transform: translateX(-50%);
         background: linear-gradient(90deg, #ff1493, #ff69b4);
         color: white;
-        padding: 12px 24px;
+        padding: 12px 28px;
         border-radius: 30px;
         font-weight: bold;
         box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
         z-index: 999999;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 15px;
         text-align: center;
         animation: pulseHint 2s infinite;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .chevron-icon {
+        font-family: monospace;
+        font-weight: 900;
+        letter-spacing: -2px;
+        font-size: 18px;
+        opacity: 0.85;
     }
 
     @keyframes pulseHint {
         0% { transform: translateX(-50%) scale(1); }
-        50% { transform: translateX(-50%) scale(1.05); }
+        50% { transform: translateX(-50%) scale(1.04); }
         100% { transform: translateX(-50%) scale(1); }
     }
     </style> 
 """, unsafe_allow_html=True)
 
-# Inject the interactive floating bar that hooks into Streamlit's native sidebar toggle button
+# Inject interactive floating action indicator referencing the format from image_2b5494.png
 st.markdown("""
     <div class="mobile-sidebar-hint" onclick="document.querySelector('[data-testid=\'stSidebarCollapsedControl\'] button')?.click();">
-        👉 Swipe Up / Tap Here to Open Options 🔑
+        <span class="chevron-icon">&gt;&gt;</span> Swipe / Tap to Open Options Key 🔑
     </div>
 """, unsafe_allow_html=True)
 
