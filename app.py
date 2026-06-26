@@ -56,14 +56,11 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Target the toolbar list container and hide everything except the last item (the 3-dots menu) */
-    div[data-testid="stAppToolbar"] ul li:not(:last-child) {
-        display: none !important;
-    }
-    
-    /* Extra catch for specific action element wrappers across differing environment configurations */
-    [data-testid="stHeaderActionElements"], 
-    .stHeaderActionElements {
+    /* Explicitly hide only the list items containing the Fork or GitHub links shown in image_2ae3d6.png */
+    div[data-testid="stAppToolbar"] ul li:has(a[href*="github"]),
+    div[data-testid="stAppToolbar"] ul li:has(a[href*="fork"]),
+    div[data-testid="stAppToolbar"] a[href*="github.com"],
+    [data-testid="stHeaderActionElements"] {
         display: none !important;
     }
     
