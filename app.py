@@ -61,13 +61,13 @@ st.markdown("""
         display: none !important;
     }
     
-    /* Extra catch for specific action element wrappers seen in image_2a817b.jpg */
+    /* Extra catch for specific action element wrappers across differing environment configurations */
     [data-testid="stHeaderActionElements"], 
     .stHeaderActionElements {
         display: none !important;
     }
     
-    /* Hides the top right colored decoration badge/crown background */
+    /* Hides the top right colored decoration badge / crown layout */
     [data-testid="stDecoration"] {
         display: none !important;
     }
