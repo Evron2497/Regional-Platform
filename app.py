@@ -55,11 +55,10 @@ if "admin_logged_in" not in st.session_state:
 # """, unsafe_allow_html=True)
 
 # --- CSS ---
-# --- CSS ---
 st.markdown("""
     <style>
-    /* Hides ONLY the toolbar buttons on the right hand side (Share, GitHub, Menu) */
-    [data-testid="stAppToolbar"] {
+    /* Hide everything in the top-right toolbar EXCEPT the three-dots main menu */
+    [data-testid="stAppToolbar"] > :not([data-testid="stMainMenu"]) {
         display: none !important;
     }
     
