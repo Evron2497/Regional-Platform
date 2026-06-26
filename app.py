@@ -471,7 +471,7 @@ with col3:
 # --- WELCOME BANNER ---
 st.markdown("""
     <div class="welcome-banner">
-        <h2>🌍 Welcome to Regional Dating Platform</h2>
+        <h2>🌍 Welcome to Global Dating Platform</h2>
         <p>Connect, Chat, and Build Meaningful Relationships Worldwide ❤️</p>
     </div>
 """, unsafe_allow_html=True)
