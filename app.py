@@ -56,9 +56,22 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Hides the entire top header bar shown in image_28a8be.png */
-    [data-testid="stHeader"] {
+    /* Explicitly hide only the list items containing the Fork or GitHub links shown in image_2ae3d6.png */
+    div[data-testid="stAppToolbar"] ul li:has(a[href*="github"]),
+    div[data-testid="stAppToolbar"] ul li:has(a[href*="fork"]),
+    div[data-testid="stAppToolbar"] a[href*="github.com"],
+    [data-testid="stHeaderActionElements"] {
         display: none !important;
+    }
+    
+    /* Hides the top right colored decoration badge / crown layout */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    
+    /* Hides the default Streamlit footer branding */
+    footer {
+        visibility: hidden !important;
     }
     
     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
@@ -66,7 +79,40 @@ st.markdown("""
     .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+
+    /* --- NEW FEATURE: FLOATING BOTTOM SWIPE/TAP HINT BAR --- */
+    .mobile-sidebar-hint {
+        position: fixed;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(90deg, #ff1493, #ff69b4);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-weight: bold;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        z-index: 999999;
+        cursor: pointer;
+        font-size: 14px;
+        text-align: center;
+        animation: pulseHint 2s infinite;
+        white-space: nowrap;
+    }
+
+    @keyframes pulseHint {
+        0% { transform: translateX(-50%) scale(1); }
+        50% { transform: translateX(-50%) scale(1.05); }
+        100% { transform: translateX(-50%) scale(1); }
+    }
     </style> 
+""", unsafe_allow_html=True)
+
+# Inject the interactive floating bar that hooks into Streamlit's native sidebar toggle button
+st.markdown("""
+    <div class="mobile-sidebar-hint" onclick="document.querySelector('[data-testid=\'stSidebarCollapsedControl\'] button')?.click();">
+        👉 Swipe Up / Tap Here to Open Options 🔑
+    </div>
 """, unsafe_allow_html=True)
 
 # --- TOP NAVBAR ---
