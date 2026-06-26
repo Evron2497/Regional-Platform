@@ -63,7 +63,7 @@
 #     else:
 #         st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=90)
 # with col2:
-#     st.markdown('<div class="navbar"><h2>MEET WITH YOUR FAVORITE LOVE ❤️</h2></div>', unsafe_allow_html=True)
+#     st.markdown('<div class="navbar"><h2>FOREVER STARTS HERE ❤️</h2></div>', unsafe_allow_html=True)
 # with col3:
 #     st.markdown("📞 **Help:** +254728831770 <br> 📧 Support Center", unsafe_allow_html=True)
 
@@ -464,9 +464,9 @@ with col1:
     else:
         st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=90)
 with col2:
-    st.markdown('<div class="navbar"><h2>MEET WITH YOUR FAVORITE LOVE ❤️</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="navbar"><h2>MY FAVORITE HELLO ❤️</h2></div>', unsafe_allow_html=True)
 with col3:
-    st.markdown("📞 **Help:** +254728831770 <br> 📧 Support Center", unsafe_allow_html=True)
+    st.markdown("📞 **Help:** +254769065385 <br> 📧 Support Center", unsafe_allow_html=True)
 
 # --- WELCOME BANNER ---
 st.markdown("""
