@@ -53,21 +53,21 @@ if "admin_logged_in" not in st.session_state:
 #     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
 #     </style> 
 # """, unsafe_allow_html=True)
-
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Completely removes the Share, Star, Edit, and GitHub icons shown in image_2a7a3c.png */
-    [data-testid="stHeaderActionElements"] {
+    /* Target the toolbar list container and hide everything except the last item (the 3-dots menu) */
+    div[data-testid="stAppToolbar"] ul li:not(:last-child) {
         display: none !important;
     }
     
-    /* Fallback catch to ensure any extra non-menu buttons in the toolbar are hidden */
-    [data-testid="stAppToolbar"] > :not([data-testid="stMainMenu"]) {
+    /* Extra catch for specific action element wrappers seen in image_2a817b.jpg */
+    [data-testid="stHeaderActionElements"], 
+    .stHeaderActionElements {
         display: none !important;
     }
     
-    /* Hides the top right colored decoration badge shown in image_2921bb.png */
+    /* Hides the top right colored decoration badge/crown background */
     [data-testid="stDecoration"] {
         display: none !important;
     }
