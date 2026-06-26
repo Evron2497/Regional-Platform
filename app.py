@@ -56,22 +56,9 @@ if "admin_logged_in" not in st.session_state:
 # --- CSS ---
 st.markdown("""
     <style>
-    /* Explicitly hide only the list items containing the Fork or GitHub links shown in image_2ae3d6.png */
-    div[data-testid="stAppToolbar"] ul li:has(a[href*="github"]),
-    div[data-testid="stAppToolbar"] ul li:has(a[href*="fork"]),
-    div[data-testid="stAppToolbar"] a[href*="github.com"],
-    [data-testid="stHeaderActionElements"] {
+    /* Hides the entire top header bar shown in image_28a8be.png */
+    [data-testid="stHeader"] {
         display: none !important;
-    }
-    
-    /* Hides the top right colored decoration badge / crown layout */
-    [data-testid="stDecoration"] {
-        display: none !important;
-    }
-    
-    /* Hides the default Streamlit footer branding */
-    footer {
-        visibility: hidden !important;
     }
     
     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
