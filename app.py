@@ -441,12 +441,28 @@ if "admin_logged_in" not in st.session_state:
     st.session_state.admin_logged_in = False
 
 # --- CSS ---
+# st.markdown("""
+#     <style>
+#     [data-testid="stHeader"] {
+#         background-color: rgba(0, 0, 0, 0) !important;
+#         height: 0px !important;
+#     }
+#     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
+#     .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
+#     .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
+#     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
+#     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+#     </style> 
+# """, unsafe_allow_html=True)
+
+# --- CSS ---
 st.markdown("""
     <style>
+    /* Hides the entire top header bar shown in image_28a8be.png */
     [data-testid="stHeader"] {
-        background-color: rgba(0, 0, 0, 0) !important;
-        height: 0px !important;
+        display: none !important;
     }
+    
     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
     .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
     .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
