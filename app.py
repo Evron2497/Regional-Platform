@@ -537,7 +537,12 @@ if "backend_started" not in st.session_state:
         st.error(f"Internal wrapper failed to spin up background API gateway: {e}")
 
 # --- PAGE CONFIG (Enforce Sidebar Expanded) ---
-st.set_page_config(layout="wide", page_title="TECH-STAR", initial_sidebar_state="expanded")
+# FIXED: Ensured initial_sidebar_state is strictly standard lowercase string literals
+st.set_page_config(
+    layout="wide", 
+    page_title="TECH-STAR", 
+    initial_sidebar_state="expanded"
+)
 db.init_db()
 
 FASTAPI_BACKEND_URL = "http://127.0.0.1:8000" 
@@ -871,7 +876,8 @@ if "selected" not in st.session_state:
                 chat_rate = profile_dict.get('chat_rate', profile_dict.get('rate', 0.0))
                 meetup_rate = profile_dict.get('meetup_rate', 0.0)
                 
-                st.image(profile_dict['photo_url'], use_container_width=True)
+                # FIXED: Updated use_column_width framework for native Streamlit compliance
+                st.image(profile_dict['photo_url'], use_column_width="always")
                 st.write(f"### {profile_dict['name']}")
                 st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
                 st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
