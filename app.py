@@ -729,7 +729,7 @@ with st.sidebar:
      if not st.session_state.admin_logged_in:
          pwd = st.text_input("Password", type="password", key="admin_pwd_entry")
          if st.button("Login"):
-             if pwd == st.secrets["ADMIN_PASSWORD"]:
+             if pwd == st.secrets[""]:
                  st.session_state.admin_logged_in = True
                  st.rerun()
              else:
