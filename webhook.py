@@ -413,12 +413,14 @@ async def connect_user_profile(payload: ConnectRequest):
         else:
             return {"status": "failed", "error": res_data}
 
+
 # --- STK PUSH CALLBACK HOOK LISTENER ---
 @app.post("/mpesa/callback")
 async def mpesa_callback(request: Request):
     """
     Asynchronous hook called by Safaricom Daraja API upon completion.
-    Matches and instantly handles successful payments to change target state maps.
+    Updates the transactional status to complete (enabling sidebar room lookups) 
+    and updates the profile's state status so it immediately vanishes from the homepage.
     """
     body = await request.json()
     stk_callback = body.get("Body", {}).get("stkCallback", {})
@@ -436,21 +438,21 @@ async def mpesa_callback(request: Request):
                 
         conn = get_webhook_db()
         try:
-            # Query targeted tracking placeholder row parameter data
+            # Locate transaction via Safaricom Request ID matching
             tx = conn.execute(
                 "SELECT profile_id, type FROM transactions WHERE merchant_request_id = ?", 
                 (merchant_request_id,)
             ).fetchone()
             
             if tx:
-                # Update status parameters and map M-Pesa tracking signature references
+                # 1. Finalize the transaction row mapping (keeps tracking ID link alive for front recovery logs)
                 conn.execute("""
                     UPDATE transactions 
                     SET transaction_id = ?, status = 'completed' 
                     WHERE merchant_request_id = ?
                 """, (mpesa_receipt, merchant_request_id))
                 
-                # Co-exist status modification directly into profiles to handle locked/unlocked spaces
+                # 2. Shift the profile status away from 'browsing' to hide it from the UI grid
                 if tx['type'] == 'chat':
                     conn.execute("UPDATE profiles SET status = 'booked' WHERE id = ?", (tx['profile_id'],))
                 elif tx['type'] == 'meetup':
