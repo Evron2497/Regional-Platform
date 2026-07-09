@@ -496,7 +496,6 @@
 #     """, (profile_id,)).fetchall()
 #     conn.close()
 #     return [dict(row) for row in rows]
-
 import sqlite3
 
 def get_db():
@@ -568,7 +567,7 @@ def add_single_profile(name, continent, country, bio, chat_rate, meetup_rate, ph
     conn.close()
 
 def get_profiles():
-    """Returns all profiles safely transformed into explicit dicts to avoid indexing crashes"""
+    """Returns all profiles safely transformed into explicit dicts for Admin view management"""
     conn = get_db()
     rows = conn.execute("SELECT * FROM profiles").fetchall()
     conn.close()
@@ -597,14 +596,15 @@ def get_single_profile_rates(profile_id: int):
 
 def get_available_profiles():
     """
-    MODIFIED: Returns profiles so they stay on the display continuously even if 
-    their status shifts to 'booked' during active messaging interactions.
+    FIXED: Returns ONLY profiles currently status='browsing'. 
+    Once shifted to 'booked' or 'approved', they disappear from the homepage grid.
+    Also drops 'meetup_rate' from payload entirely to keep it hidden on display cards.
     """
     conn = get_db()
     rows = conn.execute("""
-        SELECT id, name, continent, country, bio, chat_rate, meetup_rate, photo_url, status 
+        SELECT id, name, continent, country, bio, chat_rate, photo_url, status 
         FROM profiles 
-        WHERE status IN ('browsing', 'booked', 'approved')
+        WHERE status = 'browsing'
     """).fetchall()
     conn.close()
     
@@ -617,7 +617,7 @@ def get_available_profiles():
             'country': row['country'],
             'bio': row['bio'],
             'chat_rate': row['chat_rate'] if row['chat_rate'] is not None else 0.0,
-            'meetup_rate': row['meetup_rate'] if row['meetup_rate'] is not None else 0.0,
+            # meetup_rate excluded here to hide it from frontend display cards
             'photo_url': row['photo_url'],
             'status': row['status']
         })
@@ -717,8 +717,8 @@ def claim_and_verify_transaction(tx_id, profile_id, search_type="chat"):
 
 def get_transaction_session_lookup(tx_id):
     """
-    MODIFIED: Looks up transaction records and safely passes back both the 
-    profile target and transaction type metadata parameters to help restore states.
+    Looks up transaction records by key to find target profile targets.
+    Keeps chat fallback tracking functional even if the target profile status hiding rules apply.
     """
     conn = get_db()
     tx_id = tx_id.strip().upper()
