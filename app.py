@@ -356,6 +356,7 @@ if "selected" not in st.session_state:
                  st.write(f"### {profile_dict['name']}")
                  st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
                  st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
+                 st.write(f"📝 **Bio:** {bio_text}")
                 
                  if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
                      st.session_state.selected = profile_dict
