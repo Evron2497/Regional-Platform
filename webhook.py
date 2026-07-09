@@ -229,8 +229,6 @@
 #             conn.close()
             
 #     return {"ResultCode": 0, "ResultDesc": "Callback processed successfully"}
-
-
 import base64
 import sqlite3
 from datetime import datetime
@@ -285,9 +283,9 @@ def get_profile_amount(profile_id: int, payment_type: str) -> int:
             raise HTTPException(status_code=404, detail="Target client profile record entry not found")
         
         if payment_type == "chat":
-            return int(row["chat_rate"])
+            return int(row["chat_rate"]) if row["chat_rate"] is not None else 0
         elif payment_type == "meetup":
-            return int(row["meetup_rate"])
+            return int(row["meetup_rate"]) if row["meetup_rate"] is not None else 0
         else:
             raise HTTPException(status_code=400, detail="Invalid target platform payment destination parameter type")
             
@@ -452,11 +450,11 @@ async def mpesa_callback(request: Request):
                     WHERE merchant_request_id = ?
                 """, (mpesa_receipt, merchant_request_id))
                 
-                # Co-exist status modification directly into the profiles matrix to coordinate with locked chats
-                if tx['type'] in ('chat', 'meetup'):
+                # Co-exist status modification directly into profiles to handle locked/unlocked spaces
+                if tx['type'] == 'chat':
                     conn.execute("UPDATE profiles SET status = 'booked' WHERE id = ?", (tx['profile_id'],))
-                    if tx['type'] == 'meetup':
-                        conn.execute("UPDATE profiles SET status = 'approved' WHERE id = ?", (tx['profile_id'],))
+                elif tx['type'] == 'meetup':
+                    conn.execute("UPDATE profiles SET status = 'approved' WHERE id = ?", (tx['profile_id'],))
                         
                 conn.commit()
         finally:
