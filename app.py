@@ -167,7 +167,7 @@ with st.sidebar:
      st.header("✨ Add Your Profile Display")
      st.markdown("""
      <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px solid #ff1493; color: black; font-size:13px; margin-bottom:10px;">
-           📢 <b>Want your profile listed?</b> Fill registration metrics. Submission processing fee costs <b>KES 100.00</b> sent manually to <b>Paybill: 542542</b>, <b>Account No: 446040</b>.
+           📢 <b>Want your profile listed?</b> Fill registration metrics. Submission processing fee costs <b>KES 200.00</b> sent manually to <b>Paybill: 542542</b>, <b>Account No: 446040</b>.
      </div>
      """, unsafe_allow_html=True)
     
@@ -189,7 +189,7 @@ with st.sidebar:
                  st.session_state[f"cache_form_{sub_tx_id}"] = {
                      "name": sub_name, "continent": sub_cont, "country": sub_coun, "bio": sub_bio, "photo_url": saved_img_path
                  }
-                 db.submit_manual_transaction(sub_tx_id, 0, "446040-SUB", 100.0, "profile_submission")
+                 db.submit_manual_transaction(sub_tx_id, 0, "446040-SUB", 200.0, "profile_submission")
                  st.info("📨 Form data and reference code submitted to Admin panel queue.")
                  st.rerun()
 
