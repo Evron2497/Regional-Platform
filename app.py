@@ -338,29 +338,29 @@ with st.sidebar:
                      st.rerun()
 
 # --- MAIN APP LOGIC ---
-if "selected" not in st.session_state:
-     # --- MARKETPLACE ---
-     profiles = db.get_available_profiles()
-    
-     if not profiles:
-         st.info("✨ No profiles currently active. Please check back shortly!")
-     else:
-         cols = st.columns(3) 
-         for idx, p in enumerate(profiles):
-             with cols[idx % 3]:
-                 profile_dict = dict(p) if not isinstance(p, dict) else p
-                
-                 chat_rate = profile_dict.get('chat_rate', 0.0)
-                
-                 st.image(profile_dict['photo_url'], use_container_width=True)
-                 st.write(f"### {profile_dict['name']}")
-                 st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
-                 st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
-                 st.write(f"📝 **Bio:** {bio_text}")
-                
-                 if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
-                     st.session_state.selected = profile_dict
-                     st.rerun()
+# --- MARKETPLACE ---
+profiles = db.get_available_profiles()
+
+if not profiles:
+     st.info("✨ No profiles currently active. Please check back shortly!")
+else:
+     cols = st.columns(3) 
+     for idx, p in enumerate(profiles):
+          with cols[idx % 3]:
+               profile_dict = dict(p) if not isinstance(p, dict) else p
+              
+               chat_rate = profile_dict.get('chat_rate', 0.0)
+               bio_text = profile_dict.get('bio', 'No bio available.')
+              
+               st.image(profile_dict['photo_url'], use_container_width=True)
+               st.write(f"### {profile_dict['name']}")
+               st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
+               st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
+               st.write(f"📝 **Bio:** {bio_text}") # <-- Added bio display here
+              
+               if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
+                    st.session_state.selected = profile_dict
+                    st.rerun()
 else:
      # --- PRIVATE SESSION ---
      p = st.session_state.selected
