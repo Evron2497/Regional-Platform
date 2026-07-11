@@ -870,12 +870,12 @@ else:
          st.markdown(f"""
          <div class="pay-box">
                 <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
-                <p>To unlock your direct secure chat line, make a manual payment using the billing details below as Business No-542542, Account No-446040:</p>
+                <p>To unlock your direct secure chat line, make a manual payment using the billing details below as phone no 0769065385:</p>
                 <hr>
                 <b>1. Go to M-PESA Menu</b><br>
                 <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
-                <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
-                <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040      CHAR{p['id']}</span><br>
+                <b>3. Enter Phone No:</b> <span style="color:#ff1493; font-weight:bold;">0769065385</span> (Lipa Na IMBANK)<br>
+                <b>4. Enter Phone No:</b> <span style="color:#ff1493; font-weight:bold;">0769065385     CHAR{p['id']}</span><br>
                 <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
                 <hr>
                 <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
