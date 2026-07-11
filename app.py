@@ -679,7 +679,7 @@ with st.sidebar:
                  st.session_state[f"cache_form_{sub_tx_id}"] = {
                      "name": sub_name, "continent": sub_cont, "country": sub_coun, "bio": sub_bio, "photo_url": saved_img_path
                  }
-                 db.submit_manual_transaction(sub_tx_id, 0, "446040-SUB", 200.0, "profile_submission")
+                 db.submit_manual_transaction(sub_tx_id, 0, "0769065385-SUB", 200.0, "profile_submission")
                  st.info("📨 Form data and reference code submitted to Admin panel queue.")
                  st.rerun()
 
@@ -886,7 +886,7 @@ else:
         
          if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
              if fallback_tx_id:
-                 db.submit_manual_transaction(fallback_tx_id, p['id'], f"446040-CHA{p['id']}", p['chat_rate'], "chat")
+                 db.submit_manual_transaction(fallback_tx_id, p['id'], f"0769065385-CHA{p['id']}", p['chat_rate'], "chat")
                  st.session_state[chat_input_tracker_key] = fallback_tx_id
                  st.rerun()
              else:
