@@ -941,8 +941,8 @@ else:
                     <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
                     <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
                     <hr>
-                    <b>1. Paybill Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span><br>
-                    <b>2. Account Reference Target:</b> <span style="color:#ff1493; font-weight:bold;">446040-MEE{p['id']}</span><br>
+                    <b>1. Phone No:</b> <span style="color:#ff1493; font-weight:bold;">0769065385</span><br>
+                    <b>2. Phone No Target:</b> <span style="color:#ff1493; font-weight:bold;">0769065385-MEE{p['id']}</span><br>
                     <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {m_rate:.2f}</span><br>
                     <hr>
                     <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
@@ -953,7 +953,7 @@ else:
             
              if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
                  if fallback_meet_tx:
-                     db.submit_manual_transaction(fallback_meet_tx, p['id'], f"446040-MEE{p['id']}", m_rate, "meetup")
+                     db.submit_manual_transaction(fallback_meet_tx, p['id'], f"0769065385-MEE{p['id']}", m_rate, "meetup")
                      st.session_state[meet_input_tracker_key] = fallback_meet_tx
                      st.rerun()
                  else:
