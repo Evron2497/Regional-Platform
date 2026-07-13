@@ -171,8 +171,11 @@ def submit_manual_transaction(tx_id, profile_id, account_ref, amount, payment_ty
 
 def get_pending_verifications():
     conn = get_db()
+    # Aliased account_ref AS account_number to prevent runtime crashes in main app rendering script
     rows = conn.execute("""
-        SELECT t.*, p.name as profile_name 
+        SELECT t.id, t.transaction_id, t.merchant_request_id, t.profile_id, 
+               t.account_ref AS account_number, t.amount, t.type, t.status, 
+               p.name as profile_name 
         FROM transactions t
         LEFT JOIN profiles p ON t.profile_id = p.id
         WHERE t.status = 'pending'
@@ -203,8 +206,8 @@ def claim_and_verify_transaction(tx_id, profile_id, search_type="chat"):
         expected_ref = "446040-SUB"
         
     row = conn.execute(
-        "SELECT 1 FROM transactions WHERE transaction_id = ? AND account_ref = ? AND type = ? AND status = 'completed'", 
-        (tx_id, expected_ref, search_type)
+        "SELECT 1 FROM transactions WHERE transaction_id = ? AND account_ref LIKE ? AND type = ? AND status = 'completed'", 
+        (tx_id, f"{expected_ref}%", search_type)
     ).fetchone()
     
     conn.close()
