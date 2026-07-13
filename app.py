@@ -483,8 +483,6 @@
 #      </div>
 # """, unsafe_allow_html=True)
 
-
-
 import streamlit as st
 import database as db
 import os
@@ -493,6 +491,7 @@ import base64
 import requests  
 import subprocess
 import time
+import json
 
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
@@ -676,10 +675,23 @@ with st.sidebar:
                  st.error("Please ensure your name is written and your transaction code is copied accurately.")
              else:
                  saved_img_path = save_uploaded_file(sub_img) if sub_img else "https://via.placeholder.com/150"
-                 st.session_state[f"cache_form_{sub_tx_id}"] = {
-                     "name": sub_name, "continent": sub_cont, "country": sub_coun, "bio": sub_bio, "photo_url": saved_img_path
+                 
+                 form_payload = {
+                     "name": sub_name, 
+                     "continent": sub_cont, 
+                     "country": sub_coun, 
+                     "bio": sub_bio, 
+                     "photo_url": saved_img_path
                  }
-                 db.submit_manual_transaction(sub_tx_id, 0, "0769065385-SUB", 200.0, "profile_submission")
+                 
+                 # Locally cache it for immediate same-session view
+                 st.session_state[f"cache_form_{sub_tx_id}"] = form_payload
+                 
+                 # Store the serialized profile data directly inside the account reference parameter
+                 # This acts as a database backup so it will never disappear on refresh!
+                 serialized_account = f"446040-SUB|{json.dumps(form_payload)}"
+                 
+                 db.submit_manual_transaction(sub_tx_id, 0, serialized_account, 200.0, "profile_submission")
                  st.info("📨 Form data and reference code submitted to Admin panel queue.")
                  st.rerun()
 
@@ -708,23 +720,38 @@ with st.sidebar:
              st.write("No incoming verification claims.")
          else:
              for item in pending_list:
+                 # Extract form data from either session_state or database backup fallback
+                 form_data = None
+                 form_cache_key = f"cache_form_{item['transaction_id']}"
+                 
+                 if form_cache_key in st.session_state:
+                     form_data = st.session_state[form_cache_key]
+                 elif item['type'] == "profile_submission" and "|" in item.get('account_number', ''):
+                     try:
+                         raw_json = item['account_number'].split("|", 1)[1]
+                         form_data = json.loads(raw_json)
+                         # Restore session state cache from database backup
+                         st.session_state[form_cache_key] = form_data
+                     except Exception:
+                         form_data = None
+
+                 display_name = form_data['name'] if form_data else (item['profile_name'] if item['profile_name'] else 'New Submission')
+
                  st.markdown(f"""
                  📌 **Type:** `{item['type'].upper()}` <br>
-                 👤 **Target Client:** {item['profile_name'] if item['profile_name'] else 'New Submission'}<br>
+                 👤 **Target Client:** {display_name}<br>
                  💵 **Code Claimed:** `{item['transaction_id']}`<br>
                  💰 **Amount Paid:** KES {item['amount']:.2f}
                  """, unsafe_allow_html=True)
                 
                  if item['type'] == "profile_submission":
-                     form_cache_key = f"cache_form_{item['transaction_id']}"
-                     if form_cache_key in st.session_state:
+                     if form_data:
                          st.info("📋 Assign Profile Pricing parameters below before approving:")
-                         admin_chat_rate = st.number_input(f"Assign Chat Rate (KES) for {st.session_state[form_cache_key]['name']}", min_value=0.0, step=10.0, key=f"adm_ch_{item['transaction_id']}")
-                         admin_meet_rate = st.number_input(f"Assign Meetup Rate (KES) for {st.session_state[form_cache_key]['name']}", min_value=0.0, step=50.0, key=f"adm_mt_{item['transaction_id']}")
+                         admin_chat_rate = st.number_input(f"Assign Chat Rate (KES) for {form_data['name']}", min_value=0.0, step=10.0, key=f"adm_ch_{item['transaction_id']}")
+                         admin_meet_rate = st.number_input(f"Assign Meetup Rate (KES) for {form_data['name']}", min_value=0.0, step=50.0, key=f"adm_mt_{item['transaction_id']}")
                         
                          if st.button(f"Approve, Rate & Publish {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
                              db.admin_approve_transaction(item['transaction_id'])
-                             form_data = st.session_state[form_cache_key]
                             
                              db.add_single_profile(
                                  name=form_data["name"],
@@ -736,7 +763,8 @@ with st.sidebar:
                                  photo_url=form_data["photo_url"],
                                  status='browsing'
                              )
-                             del st.session_state[form_cache_key]
+                             if form_cache_key in st.session_state:
+                                 del st.session_state[form_cache_key]
                              st.success(f"Profile published immediately with your assigned rates!")
                              st.rerun()
                      else:
@@ -758,7 +786,7 @@ with st.sidebar:
                          st.rerun()
                  st.divider()
 
-         # --- ADD NEW CLIENT MANUALLY ---
+          # --- ADD NEW CLIENT MANUALLY ---
          st.subheader("➕ Create Client Account")
          with st.expander("Manually Provision New Client Profile", expanded=False):
              new_name = st.text_input("Name", key="new_name_in")
@@ -803,7 +831,7 @@ with st.sidebar:
                      st.success(f"Deleted {directory_p['name']}!")
                      st.rerun()
 
-         # --- ADMIN LIVE INTERVENTION OPERATOR CHAT MATRIX ---
+          # --- ADMIN LIVE INTERVENTION OPERATOR CHAT MATRIX ---
          st.divider()
          st.subheader("🗣️ Admin Live Chat Panel")
         
@@ -833,25 +861,25 @@ if st.session_state.selected is None:
      profiles = db.get_available_profiles()
 
      if not profiles:
-         st.info("✨ No profiles currently active. Please check back shortly!")
+          st.info("✨ No profiles currently active. Please check back shortly!")
      else:
-         cols = st.columns(3) 
-         for idx, p in enumerate(profiles):
-              with cols[idx % 3]:
-                   profile_dict = dict(p) if not isinstance(p, dict) else p
+          cols = st.columns(3) 
+          for idx, p in enumerate(profiles):
+               with cols[idx % 3]:
+                    profile_dict = dict(p) if not isinstance(p, dict) else p
                   
-                   chat_rate = profile_dict.get('chat_rate', 0.0)
-                   bio_text = profile_dict.get('bio', 'No bio available.')
+                    chat_rate = profile_dict.get('chat_rate', 0.0)
+                    bio_text = profile_dict.get('bio', 'No bio available.')
                   
-                   st.image(profile_dict['photo_url'], use_container_width=True)
-                   st.write(f"### {profile_dict['name']}")
-                   st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
-                   st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
-                   st.write(f"📝 **Bio:** {bio_text}")
+                    st.image(profile_dict['photo_url'], use_container_width=True)
+                    st.write(f"### {profile_dict['name']}")
+                    st.write(f"📍 **Location:** {profile_dict['country']}, {profile_dict['continent']}")
+                    st.write(f"💬 **Chat Rate:** KES {chat_rate:.2f}")
+                    st.write(f"📝 **Bio:** {bio_text}")
                   
-                   if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
-                        st.session_state.selected = profile_dict
-                        st.rerun()
+                    if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
+                         st.session_state.selected = profile_dict
+                         st.rerun()
 else:
      # --- PRIVATE SESSION ---
      p = st.session_state.selected
@@ -869,16 +897,16 @@ else:
      if not is_chat_unlocked:
          st.markdown(f"""
          <div class="pay-box">
-                <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
-                <p>To unlock your direct secure chat line, make a manual payment using the billing details below as phone no 0769065385:</p>
-                <hr>
-                <b>1. Go to M-PESA Menu</b><br>
-                <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
-                <b>3. Enter Phone No:</b> <span style="color:#ff1493; font-weight:bold;">0769065385</span> (Lipa Na IMBANK)<br>
-                <b>4. Enter Phone No:</b> <span style="color:#ff1493; font-weight:bold;">0769065385     CHAR{p['id']}</span><br>
-                <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
-                <hr>
-                <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
+               <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
+               <p>To unlock your direct secure chat line, make a manual payment using the billing details below as Business No-542542, Account No-446040:</p>
+               <hr>
+               <b>1. Go to M-PESA Menu</b><br>
+               <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
+               <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
+               <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040     CHAR{p['id']}</span><br>
+               <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
+               <hr>
+               <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
          </div>
          """, unsafe_allow_html=True)
         
@@ -886,7 +914,7 @@ else:
         
          if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
              if fallback_tx_id:
-                 db.submit_manual_transaction(fallback_tx_id, p['id'], f"0769065385-CHA{p['id']}", p['chat_rate'], "chat")
+                 db.submit_manual_transaction(fallback_tx_id, p['id'], f"446040-CHA{p['id']}", p['chat_rate'], "chat")
                  st.session_state[chat_input_tracker_key] = fallback_tx_id
                  st.rerun()
              else:
@@ -938,14 +966,14 @@ else:
              m_rate = rates['meetup_rate'] if rates else 0.0
              st.markdown(f"""
              <div class="pay-box">
-                    <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
-                    <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
-                    <hr>
-                    <b>1. Phone No:</b> <span style="color:#ff1493; font-weight:bold;">0769065385</span><br>
-                    <b>2. Phone No Target:</b> <span style="color:#ff1493; font-weight:bold;">0769065385-MEE{p['id']}</span><br>
-                    <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {m_rate:.2f}</span><br>
-                    <hr>
-                    <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
+                     <h3>🤝 Goal Unlocked: Meetup Routing Account Details</h3>
+                     <p>To authorize standard meetup routing arrangements, settle the setup invoice manually:</p>
+                     <hr>
+                     <b>1. Paybill Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span><br>
+                     <b>2. Account Reference Target:</b> <span style="color:#ff1493; font-weight:bold;">446040-MEE{p['id']}</span><br>
+                     <b>3. Required Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {m_rate:.2f}</span><br>
+                     <hr>
+                     <p>Paste your receipt's unique verification code below to ping administrative oversight logs.</p>
              </div>
              """, unsafe_allow_html=True)
             
@@ -953,7 +981,7 @@ else:
             
              if st.button("🔄 Submit Meetup Code to Admin", key=f"verify_meet_btn_{p['id']}"):
                  if fallback_meet_tx:
-                     db.submit_manual_transaction(fallback_meet_tx, p['id'], f"0769065385-MEE{p['id']}", m_rate, "meetup")
+                     db.submit_manual_transaction(fallback_meet_tx, p['id'], f"446040-MEE{p['id']}", m_rate, "meetup")
                      st.session_state[meet_input_tracker_key] = fallback_meet_tx
                      st.rerun()
                  else:
