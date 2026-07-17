@@ -495,25 +495,26 @@ import json
 
 import streamlit as st
 import streamlit as st
-
 st.markdown("""
     <style>
-        /* Target the top header/toolbar container using a broader selector */
+        /* Hide the top header bar, which contains the 'Deploy' button and menu */
         header[data-testid="stHeader"] {
             display: none !important;
         }
 
-        /* Hide the main menu, deploy button, and decoration bar */
-        [data-testid="stAppToolbar"], 
-        [data-testid="stAppDeployButton"], 
+        /* Hide the main menu and decoration */
+        [data-testid="stMainMenu"], 
         [data-testid="stDecoration"] {
             display: none !important;
         }
 
-        /* Hide footer and potential branding overlays */
-        footer, #MainMenu, .stDeployButton {
-            display: none !important;
+        /* Hide the Streamlit footer */
+        footer {
+            visibility: hidden !important;
         }
+        
+        /* Note: We are NOT targeting [data-testid="stSidebar"], 
+           which ensures the sidebar and its toggle remain functional. */
     </style>
 """, unsafe_allow_html=True)
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
