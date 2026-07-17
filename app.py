@@ -493,49 +493,31 @@ import subprocess
 import time
 import json
 
+import streamlit as st
 
-# --- PAGE CONFIG ---
-st.set_page_config(
-    layout="wide", 
-    page_title="TECH-STAR",
-    menu_items={
-        'Get Help': None,
-        'Report a bug': None,
-        'About': None
-    }
-)
+# CSS to hide the UI elements
+hide_streamlit_style = """
+            <style>
+            /* Hides the top right menu */
+            [data-testid="stAppToolbar"] {
+                display: none !important;
+            }
+            /* Hides the bottom right 'Manage app' button */
+            [data-testid="stAppDeployButton"] {
+                display: none !important;
+            }
+            /* Hides the footer */
+            footer {
+                visibility: hidden !important;
+            }
+            /* Hides the decoration bar at the top */
+            [data-testid="stDecoration"] {
+                display: none !important;
+            }
+            </style>
+            """
 
-st.markdown("""
-    <style>
-    /* Hides the top right menu (Share, Star, GitHub/About) */
-    [data-testid="stAppToolbar"] {
-        display: none !important;
-    }
-    
-    /* Hides the bottom right 'Manage app' button */
-    [data-testid="stAppDeployButton"] {
-        display: none !important;
-    }
-
-    /* Standard UI cleanup */
-    [data-testid="stDecoration"] { display: none !important; }
-    footer { visibility: hidden !important; }
-
-    [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
-    .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
-    .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
-    .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    
-    .mobile-sidebar-hint {
-        position: fixed; bottom: 20px; left: 20px;
-        background: linear-gradient(90deg, #ff1493, #ff69b4);
-        color: white; padding: 12px 20px; border-radius: 30px;
-        font-weight: bold; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
-        z-index: 999999; cursor: pointer; font-size: 14px;
-        display: flex; align-items: center; gap: 8px; animation: pulseLeftHint 2s infinite;
-    }
-    </style>
-""", unsafe_allow_html=True)
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
