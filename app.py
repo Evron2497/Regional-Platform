@@ -523,6 +523,34 @@ if "backend_started" not in st.session_state:
      except Exception as e:
          st.error(f"Internal wrapper failed to spin up background API gateway: {e}")
 
+
+
+# --- PAGE CONFIG ---
+st.set_page_config(layout="wide", page_title="TECH-STAR")
+
+# --- CSS FOR CLEAN UI ---
+# This block must come before any other UI elements like columns or markdown banners
+hide_ui = """
+<style>
+    /* Hide the top bar and menu */
+    [data-testid="stAppToolbar"], 
+    [data-testid="stMainMenu"], 
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    
+    /* Hide the deploy/manage app button */
+    [data-testid="stAppDeployButton"] {
+        display: none !important;
+    }
+    
+    /* Hide the 'Made with Streamlit' footer */
+    footer {
+        visibility: hidden !important;
+    }
+</style>
+"""
+st.markdown(hide_ui, unsafe_allow_html=True)
 # --- PAGE CONFIG ---
 st.set_page_config(layout="wide", page_title="TECH-STAR")
 db.init_db()
