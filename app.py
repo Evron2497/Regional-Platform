@@ -128,10 +128,10 @@ st.markdown("""
      <style>
      @keyframes continuousLeftToRight {
          0% {
-             transform: translateX(-100%);
+             transform: translateX(100%);
          }
          100% {
-             transform: translateX(100%);
+             transform: translateX(-100%);
          }
      }
      .welcome-banner {
