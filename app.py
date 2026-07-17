@@ -493,6 +493,72 @@ import time
 import json
 
 
+# --- CSS ---
+st.markdown("""
+    <style>
+    /* Hides the Streamlit "Deploy" or "Fork" menu */
+    #MainMenu {visibility: hidden;}
+    
+    /* Hides the top right corner icons/buttons */
+    header {visibility: hidden;}
+    
+    /* Hides the "Made with Streamlit" footer */
+    footer {visibility: hidden !important;}
+    
+    /* Hides the top decoration bar */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    
+    /* Hides the main toolbar (including the 'Fork on GitHub' button) */
+    [data-testid="stAppToolbar"] {
+        display: none !important;
+    }
+    
+    /* Sidebar and Layout Styles */
+    [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
+    .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
+    .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
+    .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
+    .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+
+    .mobile-sidebar-hint {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: linear-gradient(90deg, #ff1493, #ff69b4);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 30px;
+        font-weight: bold;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+        z-index: 999999;
+        cursor: pointer;
+        font-size: 14px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        animation: pulseLeftHint 2s infinite;
+        white-space: nowrap;
+    }
+
+    .chevron-icon {
+        font-family: monospace;
+        font-weight: 900;
+        letter-spacing: -2px;
+        font-size: 16px;
+        opacity: 0.9;
+    }
+
+    @keyframes pulseLeftHint {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.04); }
+        100% { transform: scale(1); }
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
