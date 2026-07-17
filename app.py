@@ -492,32 +492,6 @@ import subprocess
 import time
 import json
 
-# --- PAGE CONFIG ---
-st.set_page_config(layout="wide", page_title="TECH-STAR", initial_sidebar_state="expanded")
-
-# --- CSS FOR CLEAN UI ---
-st.markdown("""
-    <style>
-        /* Hide default Streamlit branding */
-        header[data-testid="stHeader"], [data-testid="stDecoration"], footer, [data-testid="stAppToolbar"] {
-            display: none !important;
-        }
-        
-        /* Sidebar: Permanent and fixed width */
-        [data-testid="stSidebar"] {
-            width: 300px !important;
-            background-color: #FFC0CB !important;
-        }
-        [data-testid="stSidebarCollapsedControl"] {
-            display: none !important;
-        }
-        
-        /* Custom UI Components */
-        .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
-        .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
-        .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    </style>
-""", unsafe_allow_html=True)
 
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
