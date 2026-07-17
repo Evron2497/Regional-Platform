@@ -482,7 +482,10 @@
 #      Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
 #      </div>
 # """, unsafe_allow_html=True)
+import streamlit as st
 
+# Hide developer option elements globally
+st.set_option("client.toolbarMode", "minimal")
 import streamlit as st
 import database as db
 import os
