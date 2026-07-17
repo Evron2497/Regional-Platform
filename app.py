@@ -485,10 +485,6 @@
 
 
 
- import streamlit as st
-
-# Hide developer option elements globally
-st.set_option("client.toolbarMode", "minimal")
 import streamlit as st
 import database as db
 import os
