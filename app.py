@@ -125,8 +125,24 @@ with col3:
 
 # --- WELCOME BANNER ---
 st.markdown("""
+     <style>
+     @keyframes slideInLeft {
+         0% {
+             transform: translateX(-50px);
+             opacity: 0;
+         }
+         100% {
+             transform: translateX(0);
+             opacity: 1;
+         }
+     }
+     .animated-title {
+         animation: slideInLeft 1.2s ease-out forwards;
+     }
+     </style>
+
      <div class="welcome-banner">
-         <h2>🌍 Welcome to Global Dating Platform</h2>
+         <h2 class="animated-title">🌍 Welcome to Global Dating Platform</h2>
          <p>Connect, Chat, and Build Meaningful Relationships Worldwide ❤️</p>
      </div>
 """, unsafe_allow_html=True)
