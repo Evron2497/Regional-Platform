@@ -496,20 +496,26 @@ import json
 import streamlit as st
 import streamlit as st
 
-hide_ui = """
-<style>
-    /* Hides the main menu, deploy button, and top decoration */
-    [data-testid="stAppToolbar"], 
-    [data-testid="stAppDeployButton"], 
-    [data-testid="stDecoration"],
-    #MainMenu, 
-    footer {
-        display: none !important;
-        visibility: hidden !important;
-    }
-</style>
-"""
-st.markdown(hide_ui, unsafe_allow_html=True)
+st.markdown("""
+    <style>
+        /* Target the top header/toolbar container using a broader selector */
+        header[data-testid="stHeader"] {
+            display: none !important;
+        }
+
+        /* Hide the main menu, deploy button, and decoration bar */
+        [data-testid="stAppToolbar"], 
+        [data-testid="stAppDeployButton"], 
+        [data-testid="stDecoration"] {
+            display: none !important;
+        }
+
+        /* Hide footer and potential branding overlays */
+        footer, #MainMenu, .stDeployButton {
+            display: none !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
