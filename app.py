@@ -486,7 +486,6 @@
 
 
 
-
 import streamlit as st
 import database as db
 import os
@@ -826,8 +825,8 @@ with st.sidebar:
                       db.save_chat_message(chosen_room_id, admin_identity, admin_response_msg.strip())
                       st.rerun()
 
-# # --- MAIN APP LOGIC ---
-# # --- MARKETPLACE ---
+# --- MAIN APP LOGIC ---
+# --- MARKETPLACE ---
 profiles = db.get_available_profiles()
 
 if not profiles:
@@ -963,7 +962,7 @@ else:
                       st.rerun()
               st.stop()
 
-# # --- FOOTER ---
+# --- FOOTER ---
 st.markdown("---")
 st.markdown("""
       <div style="text-align: center; color: grey; font-size: 12px; margin-top: 50px;">
