@@ -559,6 +559,23 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# --- SIDEBAR TOGGLE BUTTON ---
+st.markdown("""
+    <script>
+    function toggleSidebar() {
+        const button = window.parent.document.querySelectorAll('button[aria-label="Toggle sidebar"]');
+        if (button.length > 0) {
+            button[0].click();
+        }
+    }
+    </script>
+    <div style="position: fixed; top: 10px; left: 10px; z-index: 999999;">
+        <button onclick="toggleSidebar()" style="background-color: #ff1493; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            ≡ Menu
+        </button>
+    </div>
+""", unsafe_allow_html=True)
+
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
