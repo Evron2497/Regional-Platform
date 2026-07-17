@@ -539,6 +539,8 @@ def save_uploaded_file(uploaded_file):
 # ==========================================
 # 4. RESPONSIVE CSS INJECTION (CLEAN & PERMANENT SIDEBAR)
 # ==========================================
+# 4. RESPONSIVE CSS INJECTION (CLEAN & PERMANENT SIDEBAR)
+# ==========================================
 st.markdown("""
     <style>
     /* Hide unnecessary native tools and headers */
@@ -553,7 +555,7 @@ st.markdown("""
         background-color: #FFC0CB !important; 
     }
     
-    /* Cleanly hide ALL native sidebar collapse/close buttons so the user cannot close it */
+    /* Hide native collapse arrow buttons */
     [data-testid="stSidebarCollapseButton"] {
         display: none !important;
     }
@@ -567,31 +569,60 @@ st.markdown("""
     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
 
-    /* Custom Mobile Menu Button Styling (Only shows on tiny screens if needed) */
-    .mobile-menu-btn {
-        display: none;
-        position: fixed;
-        top: 15px;
-        left: 15px;
+    /* Custom Floating Action Menu Button (Always Scannable) */
+    .custom-menu-trigger {
         background: linear-gradient(90deg, #ff1493, #ff69b4);
-        color: white;
-        padding: 10px 18px;
-        border-radius: 8px;
+        color: white !important;
+        padding: 12px 24px;
+        border-radius: 30px;
         font-weight: bold;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-        z-index: 999999;
-        font-size: 14px;
+        font-size: 15px;
+        border: none;
+        box-shadow: 0px 4px 15px rgba(255, 20, 147, 0.4);
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 15px;
     }
-
-    @media (max-width: 767px) {
-        .mobile-menu-btn {
-            display: block;
-        }
+    .custom-menu-trigger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0px 6px 20px rgba(255, 20, 147, 0.6);
     }
     </style> 
 """, unsafe_allow_html=True)
 
+# ==========================================
+# 5. SIDEBAR DOM CONTROLLER INTERACTION
+# ==========================================
+# This injects a clean script handler that targets Streamlit's native expand chevron
+st.markdown("""
+    <script>
+    function openSidebar() {
+        const sidebarButton = window.parent.document.querySelector('[data-testid="stSidebarCollapsedControl"] button');
+        if (sidebarButton) {
+            sidebarButton.click();
+        } else {
+            console.log("Sidebar already expanded or target control missing.");
+        }
+    }
+    </script>
+""", unsafe_allow_html=True)
+
+
+# ==========================================
+# 6. TOP BRANDING NAVBAR & BANNER WITH MENU TRIGGER
+# ==========================================
+# Add the interactive HTML menu button right above your column layouts
+st.markdown("""
+    <button class="custom-menu-trigger" onclick="openSidebar()">
+        ☰ Open App Actions & Settings
+    </button>
+""", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([1, 4, 2])
+# ... Rest of your section 6 code down to section 9 follows identically
 # ==========================================
 # 5. MOBILE MENU INTERACTION LAYER
 # ==========================================
