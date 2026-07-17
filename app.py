@@ -829,8 +829,58 @@ with st.sidebar:
 # --- MARKETPLACE ---
 profiles = db.get_available_profiles()
 
-if not profiles:
+# 1. If no profiles exist and no private session is selected
+if not profiles and "selected" not in st.session_state:
       st.info("✨ No profiles currently active. Please check back shortly!")
+
+# 2. If a private session is actively selected, show the locked chat room
+elif "selected" in st.session_state:
+      # --- PRIVATE SESSION ---
+      p = st.session_state.selected
+      st.title(f"🔒 Private Session Locked to My Chat: {p['name']}")
+      if st.button("⬅️ Back to Directory"):
+          del st.session_state.selected
+          st.rerun()
+    
+      # 1. GATEKEEPER: CHAT TRANSACTION VALIDATION
+      chat_input_tracker_key = f"entered_tx_chat_{p['id']}"
+      tracked_chat_code = st.session_state.get(chat_input_tracker_key, "").strip().upper()
+    
+      is_chat_unlocked = db.claim_and_verify_transaction(tracked_chat_code, p['id'], "chat") if tracked_chat_code else False
+
+      if not is_chat_unlocked:
+          st.markdown(f"""
+          <div class="pay-box">
+                 <h3>💰 Lipa Na M-Pesa Payment Instructions</h3>
+                 <p>To unlock your direct secure chat line, make a manual payment using the billing details below as Business No-542542, Account No-446040:</p>
+                 <hr>
+                 <b>1. Go to M-PESA Menu</b><br>
+                 <b>2. Select Lipa Na M-PESA -> Paybill</b><br>
+                 <b>3. Enter Business No:</b> <span style="color:#ff1493; font-weight:bold;">542542</span> (Lipa Na IMBANK)<br>
+                 <b>4. Enter Account No:</b> <span style="color:#ff1493; font-weight:bold;">446040      CHAR{p['id']}</span><br>
+                 <b>5. Enter Amount:</b> <span style="color:#ff1493; font-weight:bold;">KES {p["chat_rate"]:.2f}</span><br>
+                 <hr>
+                 <p>Once paid, paste your official M-Pesa Transaction ID below for instant admin evaluation.</p>
+          </div>
+          """, unsafe_allow_html=True)
+        
+          fallback_tx_id = st.text_input("Verification Step: Paste M-Pesa Transaction ID:", key=f"tx_chat_{p['id']}").strip().upper()
+        
+          if st.button("🔓 Submit Code to Admin for Verification", key=f"verify_btn_{p['id']}"):
+              if fallback_tx_id:
+                  db.submit_manual_transaction(fallback_tx_id, p['id'], f"446040-CHA{p['id']}", p['chat_rate'], "chat")
+                  st.session_state[chat_input_tracker_key] = fallback_tx_id
+                  st.rerun()
+              else:
+                  st.warning("Please paste a valid transaction ID before submitting.")
+        
+          if tracked_chat_code:
+              st.warning("⏳ Access Status: Awaiting Admin Approval. Click refresh below to update your line link status.")
+              if st.button("🔄 Refresh Status Window"):
+                  st.rerun()
+          st.stop()
+
+# 3. Default state: profiles exist and no user has been chosen yet (Show Directory)
 else:
       cols = st.columns(3) 
       for idx, p in enumerate(profiles):
@@ -849,13 +899,6 @@ else:
                 if st.button(f"Connect with {profile_dict['name']}", key=f"btn_{profile_dict['id']}"):
                      st.session_state.selected = profile_dict
                      st.rerun()
-else:
-      # --- PRIVATE SESSION ---
-      p = st.session_state.selected
-      st.title(f"🔒 Private Session Locked to My Chat: {p['name']}")
-      if st.button("⬅️ Back to Directory"):
-          del st.session_state.selected
-          st.rerun()
     
       # 1. GATEKEEPER: CHAT TRANSACTION VALIDATION
       chat_input_tracker_key = f"entered_tx_chat_{p['id']}"
