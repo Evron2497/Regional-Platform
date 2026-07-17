@@ -588,7 +588,7 @@ with col1:
      if os.path.exists(img_path):
          st.markdown(f'<div style="overflow:hidden; border-radius:50%; width:90px; height:90px;"><img src="data:image/jpeg;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" width="90" height="90" style="object-fit:cover;"></div>', unsafe_allow_html=True)
      else:
-         st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=90)
+         st.image("https://res.cloudinary.com/jlengxni/image/upload/v1784040800/Mary_Wanjiku_up2hto.jpg", width=90)
 with col2:
      st.markdown('<div class="navbar"><h2>MY FAVORITE HELLO ❤️</h2></div>', unsafe_allow_html=True)
 with col3:
