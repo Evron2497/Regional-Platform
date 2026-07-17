@@ -482,10 +482,7 @@
 #      Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
 #      </div>
 # """, unsafe_allow_html=True)
-import streamlit as st
 
-# Hide developer option elements globally
-st.set_option("client.toolbarMode", "minimal")
 import streamlit as st
 import database as db
 import os
@@ -496,6 +493,17 @@ import subprocess
 import time
 import json
 
+
+# --- PAGE CONFIG ---
+st.set_page_config(
+    layout="wide", 
+    page_title="TECH-STAR",
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': None
+    }
+)
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
