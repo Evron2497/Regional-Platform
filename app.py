@@ -491,7 +491,14 @@ import requests
 import subprocess
 import time
 import json
+if "sidebar_state" not in st.session_state:
+    st.session_state.sidebar_state = "collapsed"
 
+def toggle_sidebar():
+    if st.session_state.sidebar_state == "expanded":
+        st.session_state.sidebar_state = "collapsed"
+    else:
+        st.session_state.sidebar_state = "expanded"
 
 # --- CSS ---
 st.markdown("""
