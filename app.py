@@ -487,7 +487,6 @@
 
 
 
-
 import streamlit as st
 import database as db
 import os
@@ -536,116 +535,99 @@ def save_uploaded_file(uploaded_file):
      return file_path
 
 # ==========================================
-# ==========================================
-# 4. RESPONSIVE CSS INJECTION (CLEAN & PERMANENT SIDEBAR)
-# ==========================================
-# 4. RESPONSIVE CSS INJECTION (CLEAN & PERMANENT SIDEBAR)
+# 4. PREMIUM UI RESPONSIVE CSS INJECTION
 # ==========================================
 st.markdown("""
     <style>
-    /* Hide unnecessary native tools and headers */
+    /* Clean up native boilerplate elements */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden !important;}
     [data-testid="stDecoration"] { display: none !important; }
     [data-testid="stAppToolbar"] { display: none !important; }
     
-    /* Permanent Sidebar Styling */
+    /* Modernized Sidebar Configuration */
     [data-testid="stSidebar"] { 
-        background-color: #FFC0CB !important; 
+        background-color: #FFF0F2 !important; 
+        border-right: 1px solid #FFE4E8;
     }
     
-    /* Hide native collapse arrow buttons */
-    [data-testid="stSidebarCollapseButton"] {
-        display: none !important;
+    /* Elegant UI Styling Elements */
+    .navbar { 
+        background: linear-gradient(135deg, #FF1493 0%, #FF69B4 100%); 
+        padding: 20px; 
+        border-radius: 12px; 
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 20, 147, 0.15);
     }
-    button[aria-label="Close sidebar"] {
-        display: none !important;
+    .pay-box { 
+        background: #FFFFFF; 
+        padding: 25px; 
+        border: 2px dashed #FF1493; 
+        border-radius: 12px; 
+        margin-bottom: 20px; 
+        color: #1E1E1E; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
-    
-    /* Branding UI elements */
-    .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
-    .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
-    .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
-    .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+    .welcome-banner { 
+        text-align: center; 
+        background: linear-gradient(135deg, #64F58B 0%, #3FE06B 100%); 
+        padding: 20px; 
+        border-radius: 12px; 
+        margin-bottom: 25px;
+        color: #0A3617;
+        box-shadow: 0 4px 12px rgba(100, 245, 139, 0.2);
+    }
 
-    /* Custom Floating Action Menu Button (Always Scannable) */
+    /* Professional Floating Action Menu Trigger */
     .custom-menu-trigger {
-        background: linear-gradient(90deg, #ff1493, #ff69b4);
+        background: linear-gradient(135deg, #FF1493 0%, #FF69B4 100%);
         color: white !important;
-        padding: 12px 24px;
-        border-radius: 30px;
-        font-weight: bold;
-        font-size: 15px;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 14px;
         border: none;
-        box-shadow: 0px 4px 15px rgba(255, 20, 147, 0.4);
+        box-shadow: 0 4px 12px rgba(255, 20, 147, 0.3);
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: transform 0.2s, box-shadow 0.2s;
-        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
     }
     .custom-menu-trigger:hover {
         transform: translateY(-2px);
-        box-shadow: 0px 6px 20px rgba(255, 20, 147, 0.6);
+        box-shadow: 0 6px 18px rgba(255, 20, 147, 0.45);
     }
     </style> 
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 5. SIDEBAR DOM CONTROLLER INTERACTION
+# 5. SIDEBAR DOM CONTROLLER INTERACTION LAYER
 # ==========================================
-# This injects a clean script handler that targets Streamlit's native expand chevron
 st.markdown("""
     <script>
     function openSidebar() {
         const sidebarButton = window.parent.document.querySelector('[data-testid="stSidebarCollapsedControl"] button');
         if (sidebarButton) {
             sidebarButton.click();
-        } else {
-            console.log("Sidebar already expanded or target control missing.");
         }
     }
     </script>
 """, unsafe_allow_html=True)
 
-
-# ==========================================
-# 6. TOP BRANDING NAVBAR & BANNER WITH MENU TRIGGER
-# ==========================================
-# Add the interactive HTML menu button right above your column layouts
-st.markdown("""
-    <button class="custom-menu-trigger" onclick="openSidebar()">
-        ☰ Open App Actions & Settings
-    </button>
-""", unsafe_allow_html=True)
-
-col1, col2, col3 = st.columns([1, 4, 2])
-# ... Rest of your section 6 code down to section 9 follows identically
-# ==========================================
-# 5. MOBILE MENU INTERACTION LAYER
-# ==========================================
-st.markdown("""
-    <div class="mobile-menu-btn" onclick="window.parent.document.querySelector('[data-testid=\'stSidebarCollapsedControl\'] button')?.click();">
-        ≡ Open Menu
-    </div>
-""", unsafe_allow_html=True)
-
-# ==========================================
-# 5. MOBILE MENU INTERACTION LAYER
-# ==========================================
-# This script listens to clicks on our custom menu button and programmatically fires the native sidebar opener
-st.markdown("""
-    <div class="mobile-menu-btn" onclick="window.parent.document.querySelector('[data-testid=\'stSidebarCollapsedControl\'] button')?.click();">
-        ≡ Open Menu
-    </div>
-""", unsafe_allow_html=True)
-
-
 # ==========================================
 # 6. TOP BRANDING NAVBAR & BANNER
 # ==========================================
+col_menu, col_empty = st.columns([1, 5])
+with col_menu:
+    st.markdown("""
+        <button class="custom-menu-trigger" onclick="openSidebar()">
+            ☰ Actions & Panel Settings
+        </button>
+    """, unsafe_allow_html=True)
+
 col1, col2, col3 = st.columns([1, 4, 2])
 with col1:
      img_path = "LOVE-IS-REAL.jpg"
@@ -654,14 +636,14 @@ with col1:
      else:
           st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=90)
 with col2:
-     st.markdown('<div class="navbar"><h2>MY FAVORITE HELLO ❤️</h2></div>', unsafe_allow_html=True)
+     st.markdown('<div class="navbar"><h2 style="margin:0; color:white;">MY FAVORITE HELLO ❤️</h2></div>', unsafe_allow_html=True)
 with col3:
-     st.markdown("📞 **Help:** +254769065385 <br> 📧 Support Center", unsafe_allow_html=True)
+     st.markdown("<div style='padding-top:10px;'>📞 **Help:** +254769065385 <br> 📧 Support Center</div>", unsafe_allow_html=True)
 
 st.markdown("""
      <div class="welcome-banner">
-         <h2>🌍 Welcome to Global Dating Platform</h2>
-         <p>Connect, Chat, and Build Meaningful Relationships Worldwide ❤️</p>
+         <h2 style="margin:0; font-weight:700;">🌍 Welcome to Global Dating Platform</h2>
+         <p style="margin:5px 0 0 0; font-size:15px; opacity:0.9;">Connect, Chat, and Build Meaningful Relationships Worldwide ❤️</p>
      </div>
 """, unsafe_allow_html=True)
 
@@ -670,47 +652,47 @@ st.markdown("""
 # ==========================================
 with st.sidebar:
      st.header("🔑 Resume Session")
-     st.markdown("Enter your paid Transaction ID to recover your corresponding setup environment (Chat vs Meetup):")
+     st.markdown("Enter your paid Transaction ID to recover your configuration environment:")
      
      recovery_tx_id = st.text_input("Enter M-Pesa Transaction ID:", key="sidebar_recovery_input").strip().upper()
      if st.button("🚀 Restore My Chat Session", key="sidebar_recovery_btn"):
-         if recovery_tx_id:
-              all_profiles = db.get_profiles()
-              found_profile_id = None
-              transaction_type = "chat"
-              
-              lookup = db.get_transaction_session_lookup(recovery_tx_id)
-              if lookup:
-                  found_profile_id = lookup['profile_id']
-                  transaction_type = lookup['type']
-              else:
-                  pending_list = db.get_pending_verifications()
-                  for verification in pending_list:
-                      if verification['transaction_id'] == recovery_tx_id:
-                          found_profile_id = verification.get('profile_id')
-                          transaction_type = verification.get('type', 'chat')
-                          break
+          if recovery_tx_id:
+               all_profiles = db.get_profiles()
+               found_profile_id = None
+               transaction_type = "chat"
+               
+               lookup = db.get_transaction_session_lookup(recovery_tx_id)
+               if lookup:
+                    found_profile_id = lookup['profile_id']
+                    transaction_type = lookup['type']
+               else:
+                    pending_list = db.get_pending_verifications()
+                    for verification in pending_list:
+                        if verification['transaction_id'] == recovery_tx_id:
+                            found_profile_id = verification.get('profile_id')
+                            transaction_type = verification.get('type', 'chat')
+                            break
 
-              if found_profile_id:
-                  matched_profile = next((dict(prof) for prof in all_profiles if prof['id'] == found_profile_id), None)
-                  if matched_profile:
-                      st.session_state.selected = matched_profile
-                      st.session_state[f"entered_tx_{transaction_type}_{found_profile_id}"] = recovery_tx_id
-                      st.success(f"Session Restored successfully for {matched_profile['name']}!")
-                      st.rerun()
-                  else:
-                      st.error("The profile associated with this code is no longer active.")
-              else:
-                  st.error("Transaction Code reference not found or unlinked. Verify entries.")
-         else:
-              st.warning("Please specify an operational Transaction string.")
+               if found_profile_id:
+                    matched_profile = next((dict(prof) for prof in all_profiles if prof['id'] == found_profile_id), None)
+                    if matched_profile:
+                         st.session_state.selected = matched_profile
+                         st.session_state[f"entered_tx_{transaction_type}_{found_profile_id}"] = recovery_tx_id
+                         st.success(f"Session Restored successfully for {matched_profile['name']}!")
+                         st.rerun()
+                    else:
+                         st.error("The profile associated with this code is no longer active.")
+               else:
+                    st.error("Transaction Code reference not found or unlinked. Verify entries.")
+          else:
+               st.warning("Please specify an operational Transaction string.")
 
      st.divider()
 
      st.header("✨ Add Your Profile Display")
      st.markdown("""
-     <div style="background-color: #ffffff; padding: 10px; border-radius: 5px; border: 1px solid #ff1493; color: black; font-size:13px; margin-bottom:10px;">
-          📢 <b>Want your profile listed?</b> Fill registration metrics. Submission processing fee costs <b>KES 200.00</b> sent manually to <b>Paybill: 542542</b>, <b>Account No: 446040</b>.
+     <div style="background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #FF1493; color: black; font-size:13px; margin-bottom:12px;">
+         📢 <b>Want your profile listed?</b> Fill registration metrics. Submission processing fee costs <b>KES 200.00</b> sent manually to <b>Paybill: 542542</b>, <b>Account No: 446040</b>.
      </div>
      """, unsafe_allow_html=True)
      
@@ -725,25 +707,26 @@ with st.sidebar:
           sub_tx_id = st.text_input("Verification Step: Paste M-Pesa Code", key="sub_tx_verify").strip().upper()
           
           if st.button("🔓 Submit Profile for Verification", key="sub_verify_btn"):
-              if not sub_tx_id or not sub_name:
-                  st.error("Please ensure your name is written and your transaction code is copied accurately.")
-              else:
-                  saved_img_path = save_uploaded_file(sub_img) if sub_img else "https://via.placeholder.com/150"
-                  
-                  form_payload = {
-                      "name": sub_name, 
-                      "continent": sub_cont, 
-                      "country": sub_coun, 
-                      "bio": sub_bio, 
-                      "photo_url": saved_img_path
-                  }
-                  
-                  st.session_state[f"cache_form_{sub_tx_id}"] = form_payload
-                  serialized_account = f"446040-SUB|{json.dumps(form_payload)}"
-                  
-                  db.submit_manual_transaction(sub_tx_id, 0, serialized_account, 200.0, "profile_submission")
-                  st.info("📨 Form data and reference code submitted to Admin panel queue.")
-                  st.rerun()
+               if not sub_tx_id or not sub_name:
+                    st.error("Please ensure your name is written and your transaction code is copied accurately.")
+               else:
+                    saved_img_path = save_uploaded_file(sub_img) if sub_img else "https://via.placeholder.com/150"
+                    
+                    form_payload = {
+                        "name": sub_name, 
+                        "continent": sub_cont, 
+                        "country": sub_coun, 
+                        "bio": sub_bio, 
+                        "photo_url": saved_img_path
+                    }
+                    
+                    # Store in volatile state fallback & fully commit into backend database storage architecture so it remains persistent
+                    st.session_state[f"cache_form_{sub_tx_id}"] = form_payload
+                    serialized_account = f"446040-SUB|{json.dumps(form_payload)}"
+                    
+                    db.submit_manual_transaction(sub_tx_id, 0, serialized_account, 200.0, "profile_submission")
+                    st.info("📨 Form data and reference code submitted to Admin panel queue.")
+                    st.rerun()
 
      st.divider()
 
@@ -752,131 +735,131 @@ with st.sidebar:
      if not st.session_state.admin_logged_in:
           pwd = st.text_input("Password", type="password", key="admin_pwd_entry")
           if st.button("Login"):
-              if pwd == st.secrets["ADMIN_PASSWORD"]:
-                  st.session_state.admin_logged_in = True
-                  st.rerun()
-              else:
-                  st.error("Incorrect Password")
+               if pwd == st.secrets["ADMIN_PASSWORD"]:
+                    st.session_state.admin_logged_in = True
+                    st.rerun()
+               else:
+                    st.error("Incorrect Password")
      else:
           if st.button("Logout"):
-              st.session_state.admin_logged_in = False
-              st.rerun()
+               st.session_state.admin_logged_in = False
+               st.rerun()
 
           st.divider()
           st.subheader("🔍 Pending Client Verifications")
           
           pending_list = db.get_pending_verifications()
           if not pending_list:
-              st.write("No incoming verification claims.")
+               st.write("No incoming verification claims.")
           else:
-              for item in pending_list:
-                  form_data = None
-                  form_cache_key = f"cache_form_{item['transaction_id']}"
-                  
-                  if form_cache_key in st.session_state:
-                      form_data = st.session_state[form_cache_key]
-                  elif item['type'] == "profile_submission" and "|" in item.get('account_number', ''):
-                      try:
-                          raw_json = item['account_number'].split("|", 1)[1]
-                          form_data = json.loads(raw_json)
-                          st.session_state[form_cache_key] = form_data
-                      except Exception:
-                          form_data = None
+               for item in pending_list:
+                    form_data = None
+                    form_cache_key = f"cache_form_{item['transaction_id']}"
+                    
+                    if form_cache_key in st.session_state:
+                         form_data = st.session_state[form_cache_key]
+                    elif item['type'] == "profile_submission" and "|" in item.get('account_number', ''):
+                         try:
+                              raw_json = item['account_number'].split("|", 1)[1]
+                              form_data = json.loads(raw_json)
+                              st.session_state[form_cache_key] = form_data
+                         except Exception:
+                              form_data = None
 
-                  display_name = form_data['name'] if form_data else (item['profile_name'] if item['profile_name'] else 'New Submission')
+                    display_name = form_data['name'] if form_data else (item['profile_name'] if item['profile_name'] else 'New Submission')
 
-                  st.markdown(f"""
-                  📌 **Type:** `{item['type'].upper()}` <br>
-                  👤 **Target Client:** {display_name}<br>
-                  💵 **Code Claimed:** `{item['transaction_id']}`<br>
-                  💰 **Amount Paid:** KES {item['amount']:.2f}
-                  """, unsafe_allow_html=True)
-                  
-                  if item['type'] == "profile_submission":
-                      if form_data:
-                          st.info("📋 Assign Profile Pricing parameters below before approving:")
-                          admin_chat_rate = st.number_input(f"Assign Chat Rate (KES) for {form_data['name']}", min_value=0.0, step=10.0, key=f"adm_ch_{item['transaction_id']}")
-                          admin_meet_rate = st.number_input(f"Assign Meetup Rate (KES) for {form_data['name']}", min_value=0.0, step=50.0, key=f"adm_mt_{item['transaction_id']}")
-                          
-                          if st.button(f"Approve, Rate & Publish {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
-                              db.admin_approve_transaction(item['transaction_id'])
-                              db.add_single_profile(
-                                  name=form_data["name"],
-                                  continent=form_data["continent"],
-                                  country=form_data["country"],
-                                  bio=form_data["bio"],
-                                  chat_rate=admin_chat_rate,
-                                  meetup_rate=admin_meet_rate,
-                                  photo_url=form_data["photo_url"],
-                                  status='browsing'
-                              )
-                              if form_cache_key in st.session_state:
-                                  del st.session_state[form_cache_key]
-                              st.success(f"Profile published immediately with your assigned rates!")
-                              st.rerun()
-                      else:
-                          st.warning("Form cached dataset missing or cleared.")
-                  else:
-                      if st.button(f"Approve & Unlock {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
-                          db.admin_approve_transaction(item['transaction_id'])
-                          
-                          if item['type'] in ("chat", "meetup"):
-                              conn = db.get_db()
-                              conn.execute("UPDATE profiles SET status = 'booked' WHERE id = ?", (item['profile_id'],))
-                              conn.commit()
-                              conn.close()
+                    st.markdown(f"""
+                    📌 **Type:** `{item['type'].upper()}` <br>
+                    👤 **Target Client:** {display_name}<br>
+                    💵 **Code Claimed:** `{item['transaction_id']}`<br>
+                    💰 **Amount Paid:** KES {item['amount']:.2f}
+                    """, unsafe_allow_html=True)
+                    
+                    if item['type'] == "profile_submission":
+                         if form_data:
+                              st.info("📋 Assign Profile Pricing parameters below before approving:")
+                              admin_chat_rate = st.number_input(f"Assign Chat Rate (KES) for {form_data['name']}", min_value=0.0, step=10.0, key=f"adm_ch_{item['transaction_id']}")
+                              admin_meet_rate = st.number_input(f"Assign Meetup Rate (KES) for {form_data['name']}", min_value=0.0, step=50.0, key=f"adm_mt_{item['transaction_id']}")
                               
-                              if item['type'] == "meetup":
-                                  db.approve_meetup(item['profile_id'])
-                          
-                          st.success(f"Transaction code {item['transaction_id']} approved!")
-                          st.rerun()
-                  st.divider()
+                              if st.button(f"Approve, Rate & Publish {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
+                                   db.admin_approve_transaction(item['transaction_id'])
+                                   db.add_single_profile(
+                                       name=form_data["name"],
+                                       continent=form_data["continent"],
+                                       country=form_data["country"],
+                                       bio=form_data["bio"],
+                                       chat_rate=admin_chat_rate,
+                                       meetup_rate=admin_meet_rate,
+                                       photo_url=form_data["photo_url"],
+                                       status='browsing'
+                                   )
+                                   if form_cache_key in st.session_state:
+                                       del st.session_state[form_cache_key]
+                                   st.success(f"Profile published immediately with your assigned rates!")
+                                   st.rerun()
+                         else:
+                              st.warning("Form cached dataset missing or cleared.")
+                    else:
+                         if st.button(f"Approve & Unlock {item['transaction_id']}", key=f"approve_{item['transaction_id']}"):
+                              db.admin_approve_transaction(item['transaction_id'])
+                              
+                              if item['type'] in ("chat", "meetup"):
+                                   conn = db.get_db()
+                                   conn.execute("UPDATE profiles SET status = 'booked' WHERE id = ?", (item['profile_id'],))
+                                   conn.commit()
+                                   conn.close()
+                                   
+                                   if item['type'] == "meetup":
+                                       db.approve_meetup(item['profile_id'])
+                              
+                              st.success(f"Transaction code {item['transaction_id']} approved!")
+                              st.rerun()
+                    st.divider()
 
           # --- ADD NEW CLIENT MANUALLY ---
           st.subheader("➕ Create Client Account")
           with st.expander("Manually Provision New Client Profile", expanded=False):
-              new_name = st.text_input("Name", key="new_name_in")
-              col1, col2 = st.columns(2)
-              with col1:
-                  new_cont = st.selectbox("Continent", ["Africa", "America", "Europe", "Asia"], key="new_cont_in")
-                  new_chat_rate = st.number_input("Chat Rate (KES)", min_value=0.0, key="new_ch_rate_in")
-              with col2:
-                  new_coun = st.text_input("Country", key="new_coun_in")
-                  new_meet_rate = st.number_input("Meetup Rate (KES)", min_value=0.0, key="new_mt_rate_in")
-              
-              new_up = st.file_uploader("Upload Image Asset", type=['png', 'jpg'], key="new_add_img")
-              new_bio = st.text_area("Bio/Description Parameters", "Enter bio here...", key="new_bio_in")
-              
-              if st.button("Save New Client", key="save_manual_client_btn"):
-                  if not new_name:
-                      st.error("A profile must have an assigned name label.")
-                  else:
-                      photo_url = save_uploaded_file(new_up) if new_up else "https://via.placeholder.com/150"
-                      db.add_single_profile(new_name, new_cont, new_coun, new_bio, new_chat_rate, new_meet_rate, photo_url, status='browsing')
-                      st.success(f"Added {new_name} successfully!")
-                      st.rerun()
+               new_name = st.text_input("Name", key="new_name_in")
+               col_c1, col_c2 = st.columns(2)
+               with col_c1:
+                    new_cont = st.selectbox("Continent", ["Africa", "America", "Europe", "Asia"], key="new_cont_in")
+                    new_chat_rate = st.number_input("Chat Rate (KES)", min_value=0.0, key="new_ch_rate_in")
+               with col_c2:
+                    new_coun = st.text_input("Country", key="new_coun_in")
+                    new_meet_rate = st.number_input("Meetup Rate (KES)", min_value=0.0, key="new_mt_rate_in")
+               
+               new_up = st.file_uploader("Upload Image Asset", type=['png', 'jpg'], key="new_add_img")
+               new_bio = st.text_area("Bio/Description Parameters", "Enter bio here...", key="new_bio_in")
+               
+               if st.button("Save New Client", key="save_manual_client_btn"):
+                    if not new_name:
+                         st.error("A profile must have an assigned name label.")
+                    else:
+                         photo_url = save_uploaded_file(new_up) if new_up else "https://via.placeholder.com/150"
+                         db.add_single_profile(new_name, new_cont, new_coun, new_bio, new_chat_rate, new_meet_rate, photo_url, status='browsing')
+                         st.success(f"Added {new_name} successfully!")
+                         st.rerun()
 
           st.divider()
           st.subheader("📋 Client Directory")
           all_profiles = db.get_profiles()
           for directory_p in all_profiles:
-              with st.expander(f"👤 {directory_p['name']} (ID: {directory_p['id']}) - Status: {directory_p['status']}"):
-                  n_n = st.text_input("Name", value=directory_p['name'], key=f"en_{directory_p['id']}")
-                  n_cr = st.number_input("Chat Rate (KES)", value=float(directory_p['chat_rate']), key=f"ecr_{directory_p['id']}")
-                  n_mr = st.number_input("Meetup Rate (KES)", value=float(directory_p['meetup_rate']), key=f"emr_{directory_p['id']}")
-                  up = st.file_uploader(f"Upload image for {directory_p['name']}", type=['png', 'jpg'], key=f"up_{directory_p['id']}")
-                  
-                  if st.button(f"Update {directory_p['name']}", key=f"upd_{directory_p['id']}"):
-                      f_u = save_uploaded_file(up) if up else directory_p['photo_url']
-                      db.update_profile(directory_p['id'], n_n, directory_p['continent'], directory_p['country'], directory_p['bio'], n_cr, n_mr, f_u)
-                      st.success(f"Updated {directory_p['name']}!")
-                      st.rerun()
-                  
-                  if st.button(f"Delete {directory_p['name']}", key=f"del_{directory_p['id']}"):
-                      db.delete_profile(directory_p['id'])
-                      st.success(f"Deleted {directory_p['name']}!")
-                      st.rerun()
+               with st.expander(f"👤 {directory_p['name']} (ID: {directory_p['id']}) - Status: {directory_p['status']}"):
+                    n_n = st.text_input("Name", value=directory_p['name'], key=f"en_{directory_p['id']}")
+                    n_cr = st.number_input("Chat Rate (KES)", value=float(directory_p['chat_rate']), key=f"ecr_{directory_p['id']}")
+                    n_mr = st.number_input("Meetup Rate (KES)", value=float(directory_p['meetup_rate']), key=f"emr_{directory_p['id']}")
+                    up = st.file_uploader(f"Upload image for {directory_p['name']}", type=['png', 'jpg'], key=f"up_{directory_p['id']}")
+                    
+                    if st.button(f"Update {directory_p['name']}", key=f"upd_{directory_p['id']}"):
+                         f_u = save_uploaded_file(up) if up else directory_p['photo_url']
+                         db.update_profile(directory_p['id'], n_n, directory_p['continent'], directory_p['country'], directory_p['bio'], n_cr, n_mr, f_u)
+                         st.success(f"Updated {directory_p['name']}!")
+                         st.rerun()
+                    
+                    if st.button(f"Delete {directory_p['name']}", key=f"del_{directory_p['id']}"):
+                         db.delete_profile(directory_p['id'])
+                         st.success(f"Deleted {directory_p['name']}!")
+                         st.rerun()
 
           # --- ADMIN LIVE INTERVENTION OPERATOR CHAT MATRIX ---
           st.divider()
@@ -886,26 +869,25 @@ with st.sidebar:
           room_choices = {cp['id']: cp['name'] for cp in chat_active_profiles}
           
           if room_choices:
-              chosen_room_id = st.selectbox("Monitor Chat Room:", options=list(room_choices.keys()), format_func=lambda x: room_choices[x], key="admin_room_picker")
-              st.caption(f"Timeline Log: {room_choices[chosen_room_id]}")
-              with st.container(height=180):
-                  room_history = db.get_chat_history(chosen_room_id)
-                  for r_msg in room_history:
-                      st.markdown(f"**{r_msg['sender']}:** {r_msg['message']}")
-              
-              admin_identity = st.radio("Send Message As:", [room_choices[chosen_room_id], "System Admin"], horizontal=True, key="admin_identity_choice")
-              admin_response_msg = st.text_input("Type response message:", key="admin_text_input")
-              
-              if st.button("✉️ Dispatch Message", key="admin_dispatch_btn"):
-                  if admin_response_msg.strip():
-                      db.save_chat_message(chosen_room_id, admin_identity, admin_response_msg.strip())
-                      st.rerun()
+               chosen_room_id = st.selectbox("Monitor Chat Room:", options=list(room_choices.keys()), format_func=lambda x: room_choices[x], key="admin_room_picker")
+               st.caption(f"Timeline Log: {room_choices[chosen_room_id]}")
+               with st.container(height=180):
+                    room_history = db.get_chat_history(chosen_room_id)
+                    for r_msg in room_history:
+                         st.markdown(f"**{r_msg['sender']}:** {r_msg['message']}")
+               
+               admin_identity = st.radio("Send Message As:", [room_choices[chosen_room_id], "System Admin"], horizontal=True, key="admin_identity_choice")
+               admin_response_msg = st.text_input("Type response message:", key="admin_text_input")
+               
+               if st.button("✉️ Dispatch Message", key="admin_dispatch_btn"):
+                    if admin_response_msg.strip():
+                         db.save_chat_message(chosen_room_id, admin_identity, admin_response_msg.strip())
+                         st.rerun()
 
 # ==========================================
 # 8. MAIN APP CONTENT LOGIC AREA
 # ==========================================
 if st.session_state.selected is None:
-     # --- MARKETPLACE MAPPER ---
      profiles = db.get_available_profiles()
 
      if not profiles:
@@ -936,7 +918,6 @@ else:
           st.session_state.selected = None
           st.rerun()
      
-     # Gatekeeper execution loop
      chat_input_tracker_key = f"entered_tx_chat_{p['id']}"
      tracked_chat_code = st.session_state.get(chat_input_tracker_key, "").strip().upper()
      
@@ -974,7 +955,6 @@ else:
                     st.rerun()
           st.stop()
 
-     # Room Processing
      is_meetup_approved = db.check_meetup_status(p['id'])
      if is_meetup_approved:
           st.success("✅ Meetup Approved! Target logistical coordinates sent.")
@@ -997,7 +977,6 @@ else:
           db.save_chat_message(p['id'], "Client", client_msg)
           st.rerun()
           
-     # --- MEETUP ACTIVATION METRIC CHECK ---
      total_messages = len(db.get_chat_history(p['id']))
      st.caption(f"Progress Metric: {total_messages}/10 interactions recorded.")
      
