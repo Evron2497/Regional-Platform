@@ -494,30 +494,22 @@ import time
 import json
 
 import streamlit as st
+import streamlit as st
 
-# CSS to hide the UI elements
-hide_streamlit_style = """
-            <style>
-            /* Hides the top right menu */
-            [data-testid="stAppToolbar"] {
-                display: none !important;
-            }
-            /* Hides the bottom right 'Manage app' button */
-            [data-testid="stAppDeployButton"] {
-                display: none !important;
-            }
-            /* Hides the footer */
-            footer {
-                visibility: hidden !important;
-            }
-            /* Hides the decoration bar at the top */
-            [data-testid="stDecoration"] {
-                display: none !important;
-            }
-            </style>
-            """
-
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+hide_ui = """
+<style>
+    /* Hides the main menu, deploy button, and top decoration */
+    [data-testid="stAppToolbar"], 
+    [data-testid="stAppDeployButton"], 
+    [data-testid="stDecoration"],
+    #MainMenu, 
+    footer {
+        display: none !important;
+        visibility: hidden !important;
+    }
+</style>
+"""
+st.markdown(hide_ui, unsafe_allow_html=True)
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
