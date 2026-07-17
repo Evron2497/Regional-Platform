@@ -588,7 +588,17 @@ with col1:
      if os.path.exists(img_path):
          st.markdown(f'<div style="overflow:hidden; border-radius:50%; width:90px; height:90px;"><img src="data:image/jpeg;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" width="90" height="90" style="object-fit:cover;"></div>', unsafe_allow_html=True)
      else:
-         st.image("https://res.cloudinary.com/jlengxni/image/upload/v1784040800/Mary_Wanjiku_up2hto.jpg", width=90)
+# The URL of your image
+image_url = "https://res.cloudinary.com/jlengxni/image/upload/v1784040800/Mary_Wanjiku_up2hto.jpg"
+
+# Displaying the image as a circle using HTML/CSS
+st.markdown(
+    f"""
+    <img src="{image_url}" width="90" height="90" 
+    style="border-radius: 50%; object-fit: cover; border: 2px solid #ff1493;">
+    """, 
+    unsafe_allow_html=True
+)
 with col2:
      st.markdown('<div class="navbar"><h2>MY FAVORITE HELLO ❤️</h2></div>', unsafe_allow_html=True)
 with col3:
