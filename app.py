@@ -514,7 +514,7 @@ st.markdown("""
 
         /* 4. Force the sidebar to be expanded and visible */
         [data-testid="stSidebar"] {
-            width: 300px !important; /* Adjust width as needed */
+            width: 300px !important;
         }
         
         /* Ensure the main content adjusts correctly to the fixed sidebar */
@@ -522,7 +522,7 @@ st.markdown("""
             padding-left: 320px !important; 
         }
     </style>
-""", unsafe_allow_html=True))
+""", unsafe_allow_html=True)
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
