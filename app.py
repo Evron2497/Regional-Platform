@@ -482,7 +482,6 @@
 #      Privacy Policy | Terms of Service | <a href="mailto:support@techstar.com">Contact Support</a>
 #      </div>
 # """, unsafe_allow_html=True)
-
 import streamlit as st
 import database as db
 import os
@@ -493,74 +492,53 @@ import subprocess
 import time
 import json
 
-import streamlit as st
-import streamlit as st
+# --- PAGE CONFIG ---
+st.set_page_config(layout="wide", page_title="TECH-STAR", initial_sidebar_state="expanded")
+
+# --- CSS FOR CLEAN UI ---
 st.markdown("""
     <style>
-        /* Hide the top header */
-        header[data-testid="stHeader"] {
+        /* Hide default Streamlit branding */
+        header[data-testid="stHeader"], [data-testid="stDecoration"], footer, [data-testid="stAppToolbar"] {
             display: none !important;
         }
-
-        /* Hide the footer */
-        footer {
-            visibility: hidden !important;
+        
+        /* Sidebar: Permanent and fixed width */
+        [data-testid="stSidebar"] {
+            width: 300px !important;
+            background-color: #FFC0CB !important;
         }
-
-        /* Hide the sidebar toggle button */
         [data-testid="stSidebarCollapsedControl"] {
             display: none !important;
         }
-
-        /* Force the sidebar to remain visible and at a fixed width */
-        [data-testid="stSidebar"] {
-            display: flex !important;
-            width: 300px !important;
-            min-width: 300px !important;
-        }
+        
+        /* Custom UI Components */
+        .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
+        .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
+        .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
     </style>
 """, unsafe_allow_html=True)
+
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
-         subprocess.Popen([
-             "uvicorn", "main:app", 
-             "--host", "127.0.0.1", 
-             "--port", "8000"
-         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+         subprocess.Popen(["uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"], 
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
          st.session_state.backend_started = True
          time.sleep(2) 
      except Exception as e:
-         st.error(f"Internal wrapper failed to spin up background API gateway: {e}")
+         st.error(f"Backend failed to start: {e}")
 
+# --- INITIALIZATION ---
+db.init_db()
 
+# --- STATE ---
+if "admin_logged_in" not in st.session_state: st.session_state.admin_logged_in = False
+if "selected" not in st.session_state: st.session_state.selected = None
 
-# --- PAGE CONFIG ---
-st.set_page_config(layout="wide", page_title="TECH-STAR")
+# [Rest of your function definitions, Sidebar Logic, and App Logic follow here...]
 
-# --- CSS FOR CLEAN UI ---
-# This block must come before any other UI elements like columns or markdown banners
-hide_ui = """
-<style>
-    /* Hide the top bar and menu */
-    [data-testid="stAppToolbar"], 
-    [data-testid="stMainMenu"], 
-    [data-testid="stDecoration"] {
-        display: none !important;
-    }
-    
-    /* Hide the deploy/manage app button */
-    [data-testid="stAppDeployButton"] {
-        display: none !important;
-    }
-    
-    /* Hide the 'Made with Streamlit' footer */
-    footer {
-        visibility: hidden !important;
-    }
-</style>
-"""
-st.markdown(hide_ui, unsafe_allow_html=True)
+# Ensure your UI layout code (st.columns, st.sidebar, etc.) is placed exactly as it was in your original script.
 # --- PAGE CONFIG ---
 st.set_page_config(layout="wide", page_title="TECH-STAR")
 db.init_db()
