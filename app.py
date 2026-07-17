@@ -126,20 +126,22 @@ with col3:
 # --- WELCOME BANNER ---
 st.markdown("""
      <style>
-     @keyframes continuousPan {
+     @keyframes continuousLeftToRight {
          0% {
-             transform: translateX(-15px);
-         }
-         50% {
-             transform: translateX(15px);
+             transform: translateX(-100%);
          }
          100% {
-             transform: translateX(-15px);
+             transform: translateX(100%);
          }
      }
+     .welcome-banner {
+         overflow: hidden; /* Prevents the page from creating a horizontal scrollbar */
+         position: relative;
+     }
      .marquee-heading {
-         display: inline-block;
-         animation: continuousPan 4s ease-in-out infinite;
+         display: block;
+         white-space: nowrap;
+         animation: continuousLeftToRight 12s linear infinite;
          margin: 0;
          padding-bottom: 10px;
      }
