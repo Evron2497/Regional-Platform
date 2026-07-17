@@ -582,7 +582,36 @@ st.markdown("""
         </button>
     </div>
 """, unsafe_allow_html=True)
-
+st.markdown("""
+    <style>
+    .toggle-button {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 999999;
+        background-color: #ff1493;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.2);
+    }
+    </style>
+    
+    <button class="toggle-button" onclick="
+        // Find the button that controls the sidebar
+        var buttons = window.parent.document.querySelectorAll('button[aria-label=\'Toggle sidebar\']');
+        if (buttons.length > 0) {
+            buttons[0].click();
+        } else {
+            // Fallback for different versions
+            var menu = window.parent.document.querySelector('[data-testid=\'stSidebarCollapsedControl\']');
+            if (menu) menu.click();
+        }
+    ">≡ Menu</button>
+""", unsafe_allow_html=True)
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
