@@ -497,26 +497,32 @@ import streamlit as st
 import streamlit as st
 st.markdown("""
     <style>
-        /* Hide the top header bar, which contains the 'Deploy' button and menu */
+        /* 1. Hide the top header, main menu, and deploy buttons */
         header[data-testid="stHeader"] {
             display: none !important;
         }
 
-        /* Hide the main menu and decoration */
-        [data-testid="stMainMenu"], 
-        [data-testid="stDecoration"] {
-            display: none !important;
-        }
-
-        /* Hide the Streamlit footer */
+        /* 2. Hide the footer */
         footer {
             visibility: hidden !important;
         }
+
+        /* 3. Hide the sidebar toggle button specifically */
+        [data-testid="stSidebarCollapsedControl"] {
+            display: none !important;
+        }
+
+        /* 4. Force the sidebar to be expanded and visible */
+        [data-testid="stSidebar"] {
+            width: 300px !important; /* Adjust width as needed */
+        }
         
-        /* Note: We are NOT targeting [data-testid="stSidebar"], 
-           which ensures the sidebar and its toggle remain functional. */
+        /* Ensure the main content adjusts correctly to the fixed sidebar */
+        [data-testid="stMainBlockContainer"] {
+            padding-left: 320px !important; 
+        }
     </style>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True))
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
 if "backend_started" not in st.session_state:
      try:
