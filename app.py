@@ -98,10 +98,26 @@ st.markdown("""
 col1, col2, col3 = st.columns([1, 4, 2])
 with col1:
      img_path = "LOVE-IS-REAL.jpg"
+     fallback_url = "https://res.cloudinary.com/jlengxni/image/upload/v1784288493/pexels-kold-shots-61080370-36466785_fnszmk.jpg"
+     
      if os.path.exists(img_path):
-         st.markdown(f'<div style="overflow:hidden; border-radius:50%; width:90px; height:90px;"><img src="data:image/jpeg;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" width="90" height="90" style="object-fit:cover;"></div>', unsafe_allow_html=True)
+         # Convert local image to base64 and display inside a circular frame
+         with open(img_path, "rb") as image_file:
+             encoded_string = base64.b64encode(image_file.read()).decode()
+         st.markdown(
+             f'<div style="overflow:hidden; border-radius:50%; width:90px; height:90px; border: 2px solid #ff1493;">'
+             f'<img src="data:image/jpeg;base64,{encoded_string}" width="90" height="90" style="object-fit:cover;">'
+             f'</div>', 
+             unsafe_allow_html=True
+         )
      else:
-         st.image("https://res.cloudinary.com/jlengxni/image/upload/v1784288493/pexels-kold-shots-61080370-36466785_fnszmk.jpg, width=90)
+         # Fallback URL styled in a matching circular frame
+         st.markdown(
+             f'<div style="overflow:hidden; border-radius:50%; width:90px; height:90px; border: 2px solid #ff1493;">'
+             f'<img src="{fallback_url}" width="90" height="90" style="object-fit:cover;">'
+             f'</div>', 
+             unsafe_allow_html=True
+         )
 with col2:
      st.markdown('<div class="navbar"><h2>MY FAVORITE HELLO ❤️</h2></div>', unsafe_allow_html=True)
 with col3:
