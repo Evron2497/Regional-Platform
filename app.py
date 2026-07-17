@@ -105,8 +105,8 @@ with col1:
          with open(img_path, "rb") as image_file:
              encoded_string = base64.b64encode(image_file.read()).decode()
          st.markdown(
-             f'<div style="overflow:hidden; border-radius:50%; width:90px; height:90px; border: 2px solid #ff1493;">'
-             f'<img src="data:image/jpeg;base64,{encoded_string}" width="90" height="90" style="object-fit:cover;">'
+             f'<div style="overflow:hidden; border-radius:50%; width:150px; height:150px; border: 2px solid #ff1493;">'
+             f'<img src="data:image/jpeg;base64,{encoded_string}" width="150" height="150" style="object-fit:cover;">'
              f'</div>', 
              unsafe_allow_html=True
          )
