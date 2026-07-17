@@ -536,25 +536,38 @@ def save_uploaded_file(uploaded_file):
      return file_path
 
 # ==========================================
-# 4. RESPONSIVE CSS INJECTION (PERMANENT DESKTOP / MOBILE MENU)
+# ==========================================
+# 4. RESPONSIVE CSS INJECTION (CLEAN & PERMANENT SIDEBAR)
 # ==========================================
 st.markdown("""
     <style>
-    /* Clean streams hiding unnecessary default tools */
+    /* Hide unnecessary native tools and headers */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden !important;}
     [data-testid="stDecoration"] { display: none !important; }
     [data-testid="stAppToolbar"] { display: none !important; }
     
+    /* Permanent Sidebar Styling */
+    [data-testid="stSidebar"] { 
+        background-color: #FFC0CB !important; 
+    }
+    
+    /* Cleanly hide ALL native sidebar collapse/close buttons so the user cannot close it */
+    [data-testid="stSidebarCollapseButton"] {
+        display: none !important;
+    }
+    button[aria-label="Close sidebar"] {
+        display: none !important;
+    }
+    
     /* Branding UI elements */
-    [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
     .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
     .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
     .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
 
-    /* Custom Mobile Menu Button Styling */
+    /* Custom Mobile Menu Button Styling (Only shows on tiny screens if needed) */
     .mobile-menu-btn {
         display: none;
         position: fixed;
@@ -571,27 +584,21 @@ st.markdown("""
         cursor: pointer;
     }
 
-    /* Large Screens: Permanent Sidebar */
-    @media (min-width: 768px) {
-        /* Force display the sidebar */
-        [data-testid="stSidebar"] {
-            display: flex !important;
-            min-width: 340px !important;
-            max-width: 340px !important;
-        }
-        /* Hide the collapse/close arrow button so user cannot close it */
-        [data-testid="stSidebarCollapseButton"] {
-            display: none !important;
-        }
-    }
-
-    /* Small Screens (Mobile/Tablets): Collapsible Menu System */
     @media (max-width: 767px) {
         .mobile-menu-btn {
-            display: block; /* Show the custom menu button */
+            display: block;
         }
     }
     </style> 
+""", unsafe_allow_html=True)
+
+# ==========================================
+# 5. MOBILE MENU INTERACTION LAYER
+# ==========================================
+st.markdown("""
+    <div class="mobile-menu-btn" onclick="window.parent.document.querySelector('[data-testid=\'stSidebarCollapsedControl\'] button')?.click();">
+        ≡ Open Menu
+    </div>
 """, unsafe_allow_html=True)
 
 # ==========================================
