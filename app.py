@@ -505,29 +505,35 @@ st.set_page_config(
     }
 )
 
-# --- CSS TO HIDE DEVELOPER UI ---
 st.markdown("""
     <style>
-    [data-testid="stAppToolbar"], [data-testid="stDecoration"] {
+    /* Hides the top right menu (Share, Star, GitHub/About) */
+    [data-testid="stAppToolbar"] {
         display: none !important;
     }
-    footer {
-        visibility: hidden !important;
+    
+    /* Hides the bottom right 'Manage app' button */
+    [data-testid="stAppDeployButton"] {
+        display: none !important;
     }
+
+    /* Standard UI cleanup */
+    [data-testid="stDecoration"] { display: none !important; }
+    footer { visibility: hidden !important; }
+
     [data-testid="stSidebar"] { background-color: #FFC0CB !important; }
     .navbar { background: linear-gradient(90deg, #ff69b4, #ff1493); padding: 15px; border-radius: 10px; color: white; }
     .pay-box { background: #f9f9f9; padding: 20px; border: 2px dashed #ff1493; border-radius: 10px; margin-bottom: 15px; color: black; }
-    .rounded-img { border-radius: 50%; width: 110px; height: 110px; object-fit: cover; }
     .welcome-banner { text-align: center; background-color: #64F58B; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+    
     .mobile-sidebar-hint {
         position: fixed; bottom: 20px; left: 20px;
         background: linear-gradient(90deg, #ff1493, #ff69b4);
         color: white; padding: 12px 20px; border-radius: 30px;
         font-weight: bold; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
         z-index: 999999; cursor: pointer; font-size: 14px;
-        display: flex; align-items: center; gap: 8px; animation: pulse 2s infinite;
+        display: flex; align-items: center; gap: 8px; animation: pulseLeftHint 2s infinite;
     }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
     </style>
 """, unsafe_allow_html=True)
 # --- EMBEDDED BACKEND BOOTSTRAPPER ---
