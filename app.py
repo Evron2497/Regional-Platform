@@ -8,16 +8,7 @@ import subprocess
 import time
 import json
 
-# --- PAGE CONFIG (Must be the VERY FIRST Streamlit command) ---
-st.set_page_config(
-    layout="wide", 
-    page_title="TECH-STAR",
-    menu_items={
-        'Get Help': None,
-        'Report a bug': None,
-        'About': None
-    }
-)
+
 
 # --- CSS TO HIDE DEVELOPER UI & STYLE ELEMENTS ---
 st.markdown("""
