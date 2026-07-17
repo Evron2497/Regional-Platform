@@ -497,29 +497,26 @@ import streamlit as st
 import streamlit as st
 st.markdown("""
     <style>
-        /* 1. Hide the top header, main menu, and deploy buttons */
+        /* Hide the top header */
         header[data-testid="stHeader"] {
             display: none !important;
         }
 
-        /* 2. Hide the footer */
+        /* Hide the footer */
         footer {
             visibility: hidden !important;
         }
 
-        /* 3. Hide the sidebar toggle button specifically */
+        /* Hide the sidebar toggle button */
         [data-testid="stSidebarCollapsedControl"] {
             display: none !important;
         }
 
-        /* 4. Force the sidebar to be expanded and visible */
+        /* Force the sidebar to remain visible and at a fixed width */
         [data-testid="stSidebar"] {
+            display: flex !important;
             width: 300px !important;
-        }
-        
-        /* Ensure the main content adjusts correctly to the fixed sidebar */
-        [data-testid="stMainBlockContainer"] {
-            padding-left: 320px !important; 
+            min-width: 300px !important;
         }
     </style>
 """, unsafe_allow_html=True)
