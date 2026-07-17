@@ -589,16 +589,27 @@ with col1:
          st.markdown(f'<div style="overflow:hidden; border-radius:50%; width:90px; height:90px;"><img src="data:image/jpeg;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" width="90" height="90" style="object-fit:cover;"></div>', unsafe_allow_html=True)
      else:
 # The URL of your image
-image_url = "https://res.cloudinary.com/jlengxni/image/upload/v1784040800/Mary_Wanjiku_up2hto.jpg"
+ith st.sidebar:
+    st.markdown("""
+    <div class="sidebar-branding" style="text-align:center;">
+        <img src="https://res.cloudinary.com/jlengxni/image/upload/v1784122847/CONFE_fhyh4b.jpg"
+             style="
+                 width:180px;
+                 height:180px;
+                 border-radius:50%;
+                 object-fit:cover;
+                 display:block;
+                 margin:0 auto 10px auto;
+                 border:3px solid #ffffff;
+                 box-shadow:0 2px 8px rgba(0,0,0,0.2);
+             ">
+        <h3 style="margin-bottom:2px;">Longisa Admin</h3>
+        <span style="font-size:0.85rem; opacity:0.8;">
+            Secure Admin Dashboard Access
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Displaying the image as a circle using HTML/CSS
-st.markdown(
-    f"""
-    <img src="{image_url}" width="90" height="90" 
-    style="border-radius: 50%; object-fit: cover; border: 2px solid #ff1493;">
-    """, 
-    unsafe_allow_html=True
-)
 with col2:
      st.markdown('<div class="navbar"><h2>MY FAVORITE HELLO ❤️</h2></div>', unsafe_allow_html=True)
 with col3:
